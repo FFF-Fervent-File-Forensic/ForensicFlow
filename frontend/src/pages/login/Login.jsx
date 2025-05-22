@@ -22,7 +22,7 @@ function Login() {
     return (
         <div className="center-wrapper">
             <div className="login-container">
-                <h1 className="logo">FFF</h1>
+                <img src="/logo.png" alt="FFF logo" className="logo-image" />
                 <input
                     type="email"
                     placeholder="이메일"
