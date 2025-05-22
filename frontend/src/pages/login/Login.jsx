@@ -1,18 +1,20 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // useNavigate 추가!
+
 import "./Login.css";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const navigate = useNavigate(); 
 
     const isFormValid = email.trim() !== "" && password.trim() !== "";
 
     const handleLogin = async () => {
         if (email === "admin" && password === "pwd") {
             setErrorMessage("");
-            // 로그인 성공 navigate("/main") 이후 추가가
+            navigate("/main");
         } else {
             setErrorMessage(
                 "이메일 또는 비밀번호가 잘못 되었습니다. 이메일과 비밀번호를 정확히 입력해 주세요."
@@ -48,7 +50,7 @@ function Login() {
                 </button>
 
                 <div className="link-wrapper">
-                    <Link to="/Signup" className="link">회원가입</Link>
+                    <Link to="/signup" className="link">회원가입</Link>
                 </div>
             </div>
         </div>
