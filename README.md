@@ -1,8 +1,13 @@
 # ForensicFlow
 
+포렌식 절차 지원 웹 사이트 개발 
+
+
 ### 조원
 
 > 남인혁, 임윤수, 박정현
+
+---
 
 ### Commit Convention
 
@@ -16,3 +21,22 @@ Commit 예시
 - style: addFolder 버튼 크기 수정
 - refactor: 로그인 폼 코드 중복 제거
 ```
+
+---
+
+### Getting Started
+
+**git clone**
+```bash
+git.clone git@github.com:FFF-Fervent-File-Forensic/ForensicFlow.git
+```
+**라이브러리 설치**
+```bash
+cd frontend
+npm install
+```
+**개발 서버 실행**
+```bash
+npm start
+```
+
