@@ -1,0 +1,131 @@
+.input-form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+  
+  .input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 40px;
+    margin-bottom: 40px;
+  }
+  
+  .label-group {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+  }
+  
+  .label-group label {
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .label-group span {
+    padding: 8px 4px;
+  }
+  
+  .label-group input {
+    padding: 6px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+  }
+  
+  .textarea-group {
+    margin-bottom: 30px;
+  }
+  
+  .textarea-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .textarea-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    resize: vertical;
+  }
+  
+  .form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+  
+  .save-button {
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .complete-button {
+    background-color: #eee;
+    color: #aaa;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: not-allowed;
+  }
+  
+  .blur-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(5px);
+    background: rgba(255, 255, 255, 0.6);
+    z-index: 900;
+    display: none;
+  }
+  
+  .blur-overlay.active {
+    display: block;
+  }
+  
+  .modal-box.centered {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 360px;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 30px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+  }
+  
+  .modal-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  
+  .upload-area {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    background: #f0f0f0;
+    border-radius: 30px;
+    cursor: pointer;
+    color: #888;
+    font-size: 14px;
+  }
+  
