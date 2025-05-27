@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #f4f4f8;
+}
+
+.report-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 0;
+}
+
+.report-card {
+  width: 480px;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 60px 40px 40px 40px;
+  position: relative;
+}
+
+.report-title {
+  text-align: center;
+  font-size: 18px;
+  margin-bottom: 40px;
+  font-weight: 500;
+}
+
+.report-section {
+  margin-bottom: 25px;
+}
+
+.report-section.with-line {
+  border-top: 1px solid #444;
+  padding-top: 15px;
+}
+
+.report-labels {
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.report-labels.bold {
+  font-weight: bold;
+}
+
+.report-values {
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.report-bullet {
+  list-style-type: disc;
+  margin-left: 20px;
+  font-size: 14px;
+}
+
+.report-bullet li {
+  margin-bottom: 8px;
+}
+
+.report-footer {
+  margin-top: 60px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.report-date {
+  margin-left: 10px;
+}
+
+.report-sign {
+  text-align: right;
+  line-height: 1.4;
+}
+
+.report-arrows {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.report-arrows button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.download-button {
+  margin-top: 20px;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  padding: 10px 24px;
+  font-size: 14px;
+  border: none;
+  border-radius: 24px;
+  cursor: pointer;
+}
+
