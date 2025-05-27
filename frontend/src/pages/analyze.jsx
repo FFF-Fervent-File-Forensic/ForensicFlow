@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import "../styles/AnalysisStepTable.css";
 
 export default function AnalysisStepTable() {
@@ -21,6 +22,12 @@ const data = [{
 //         console.error("데이터 로딩 오류:", error);
 //       });
 //   }, []);
+  const navigate = useNavigate();
+
+
+  const handleClick = () => {
+    navigate("/Analyzeinput");
+  };
 
   return (
     <div className="analysis-container">
@@ -34,12 +41,13 @@ const data = [{
           </tr>
         </thead>
         <tbody>
-          {data.map((item, idx) => (
- <tr key={idx}>
+          {data.map((item, idx) => (<tr key={idx}>
               <td className="align-left">
                 <div className="file-row">
                   <span>{item.name}</span>
-                  <button className="input-button">입력</button>
+                  <button className="input-button" onClick={handleClick}>
+                    입력
+                  </button>
                 </div>
               </td>
               <td className="align-center">{item.owner}</td>
