@@ -172,9 +172,13 @@ export default function EvidenceManager() {
                   <input className={styles.inputField} value={formData.고유번호} onChange={e => setFormData({ ...formData, 고유번호: e.target.value })} />
                 </div>
                 <label style={{ marginTop: '8px', marginBottom: '2px' }}>제조일시:</label>
+                <div className={styles.inputRow}>
                 <input type="datetime-local" value={formData.제조일시} onChange={e => setFormData({ ...formData, 제조일시: e.target.value })} />
+                </div>
                 <label style={{ marginTop: '8px', marginBottom: '2px' }}>수집일시:</label>
+                <div className={styles.inputRow}>
                 <input type="datetime-local" value={formData.수집일시} onChange={e => setFormData({ ...formData, 수집일시: e.target.value })} />
+                </div>
                 <div className={styles.formButtons}>
                   <button onClick={() => {
                     setIsUploadUIVisible(false);
