@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styles from '../styles/DataTransfer.module.css';
 import { useEvidence } from '../contexts/EvidenceContext';
+import { useNavigate } from 'react-router-dom';
 
 const initialTransferForm = {
   출발위치: '',
@@ -34,6 +35,8 @@ export default function DataTransfer() {
   const [hashModalIdx, setHashModalIdx] = useState(null);
   const [hashFile, setHashFile] = useState(null);
   const [hashError, setHashError] = useState(false);
+
+  const navigate = useNavigate();
 
   const openModal = (idx) => {
     setModalIdx(idx);
@@ -276,7 +279,10 @@ export default function DataTransfer() {
         <button
           className={`${styles.dtNextBtn} ${isAllDone ? styles.dtNextBtnActive : ''}`}
           disabled={!isAllDone}
-        >다음 단계</button>
+          onClick={() => navigate('/analyze')}
+        >
+          다음 단계
+        </button>
       </div>
     </div>
   );
