@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../styles/DataTransfer.css';
+import styles from '../styles/DataTransfer.module.css';
 import { useEvidence } from '../contexts/EvidenceContext';
 
 const initialTransferForm = {
@@ -28,10 +28,10 @@ export default function DataTransfer() {
       transferData: null,
     }))
   );
-  const [modalIdx, setModalIdx] = useState(null); // 이송 정보 모달 인덱스
+  const [modalIdx, setModalIdx] = useState(null);
   const [form, setForm] = useState(initialTransferForm);
   const [signatureFile, setSignatureFile] = useState(null);
-  const [hashModalIdx, setHashModalIdx] = useState(null); // 해시 검증 모달 인덱스
+  const [hashModalIdx, setHashModalIdx] = useState(null);
   const [hashFile, setHashFile] = useState(null);
   const [hashError, setHashError] = useState(false);
 
@@ -87,12 +87,10 @@ export default function DataTransfer() {
     closeModal();
   };
 
-  // 해시 검증 파일 첨부
   const handleHashFile = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setHashFile(file);
-    // 파일명(해시) 비교 또는 만능키.txt 허용
     if (file.name === evidenceList[hashModalIdx].name || file.name === '만능키.txt') {
       setRowStates(states => states.map((item, i) =>
         i === hashModalIdx ? { ...item, hashStatus: 'done' } : item
@@ -103,80 +101,78 @@ export default function DataTransfer() {
     }
   };
 
-  // 모든 증거의 이송 정보와 해시 검증이 완료되었는지 확인
   const isAllDone = rowStates.every(item => item.transferStatus === 'done' && item.hashStatus === 'done');
 
   return (
-    <div className="dt-container" style={{ position: 'relative' }}>
-      {/* 이송 정보 입력 모달 */}
+    <div className={styles.dtContainer}>
       {modalIdx !== null && (
-        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',zIndex:2000}}>
-          <div className="dt-modal-backdrop" style={{zIndex:2001}} />
-          <div className="upload-box dt-modal-upload-box" style={{zIndex:2002}}>
-            <p className="upload-title">이송 정보 입력</p>
-            <div className="file-info-form">
+        <div className={styles.transferModalOverlay}>
+          <div className={styles.transferModalBackdrop} />
+          <div className={styles.transferModalContent}>
+            <p className={styles.uploadTitle}>이송 정보 입력</p>
+            <div className={styles.fileInfoForm}>
               <p><strong>파일명:</strong> {evidenceList[modalIdx]?.name}</p>
-              <div className="input-row">
-                <label className="input-label">출발 위치</label>
-                <input className="input-field" value={form.출발위치} onChange={e=>handleFormChange('출발위치',e.target.value)} />
+              <div className={styles.inputRow}>
+                <label className={styles.inputLabel}>출발 위치</label>
+                <input className={styles.inputField} value={form.출발위치} onChange={e=>handleFormChange('출발위치',e.target.value)} />
               </div>
-              <div className="input-row">
-                <label className="input-label">도착 위치</label>
-                <input className="input-field" value={form.도착위치} onChange={e=>handleFormChange('도착위치',e.target.value)} />
+              <div className={styles.inputRow}>
+                <label className={styles.inputLabel}>도착 위치</label>
+                <input className={styles.inputField} value={form.도착위치} onChange={e=>handleFormChange('도착위치',e.target.value)} />
               </div>
-              <div className="row">
-                <div className="input-row">
-                  <label className="input-label">이송 일시</label>
-                  <input className="input-field" type="datetime-local" value={form.이송일시} onChange={e=>handleFormChange('이송일시',e.target.value)} />
+              <div className={styles.formRow}>
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>이송 일시</label>
+                  <input className={styles.inputField} type="datetime-local" value={form.이송일시} onChange={e=>handleFormChange('이송일시',e.target.value)} />
                 </div>
-                <div className="input-row">
-                  <label className="input-label">도착 일시</label>
-                  <input className="input-field" type="datetime-local" value={form.도착일시} onChange={e=>handleFormChange('도착일시',e.target.value)} />
-                </div>
-              </div>
-              <div className="row">
-                <div className="input-row">
-                  <label className="input-label">발신자</label>
-                  <input className="input-field" value={form.발신자} onChange={e=>handleFormChange('발신자',e.target.value)} />
-                </div>
-                <div className="input-row">
-                  <label className="input-label">발신자 연락처</label>
-                  <input className="input-field" value={form.발신자연락처} onChange={e=>handleFormChange('발신자연락처',e.target.value)} />
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>도착 일시</label>
+                  <input className={styles.inputField} type="datetime-local" value={form.도착일시} onChange={e=>handleFormChange('도착일시',e.target.value)} />
                 </div>
               </div>
-              <div className="row">
-                <div className="input-row">
-                  <label className="input-label">이송자</label>
-                  <input className="input-field" value={form.이송자} onChange={e=>handleFormChange('이송자',e.target.value)} />
+              <div className={styles.formRow}>
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>발신자</label>
+                  <input className={styles.inputField} value={form.발신자} onChange={e=>handleFormChange('발신자',e.target.value)} />
                 </div>
-                <div className="input-row">
-                  <label className="input-label">이송자 연락처</label>
-                  <input className="input-field" value={form.이송자연락처} onChange={e=>handleFormChange('이송자연락처',e.target.value)} />
-                </div>
-              </div>
-              <div className="row">
-                <div className="input-row">
-                  <label className="input-label">수령자</label>
-                  <input className="input-field" value={form.수령자} onChange={e=>handleFormChange('수령자',e.target.value)} />
-                </div>
-                <div className="input-row">
-                  <label className="input-label">수령자 연락처</label>
-                  <input className="input-field" value={form.수령자연락처} onChange={e=>handleFormChange('수령자연락처',e.target.value)} />
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>발신자 연락처</label>
+                  <input className={styles.inputField} value={form.발신자연락처} onChange={e=>handleFormChange('발신자연락처',e.target.value)} />
                 </div>
               </div>
-              <div className="input-row" style={{ gap: '8px' }}>
-                <label className="input-label">담당자</label>
-                <input className="input-field" value={form.담당자} onChange={e=>handleFormChange('담당자',e.target.value)} />
+              <div className={styles.formRow}>
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>이송자</label>
+                  <input className={styles.inputField} value={form.이송자} onChange={e=>handleFormChange('이송자',e.target.value)} />
+                </div>
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>이송자 연락처</label>
+                  <input className={styles.inputField} value={form.이송자연락처} onChange={e=>handleFormChange('이송자연락처',e.target.value)} />
+                </div>
+              </div>
+              <div className={styles.formRow}>
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>수령자</label>
+                  <input className={styles.inputField} value={form.수령자} onChange={e=>handleFormChange('수령자',e.target.value)} />
+                </div>
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>수령자 연락처</label>
+                  <input className={styles.inputField} value={form.수령자연락처} onChange={e=>handleFormChange('수령자연락처',e.target.value)} />
+                </div>
+              </div>
+              <div className={styles.inputRowGap8}>
+                <label className={styles.inputLabel}>담당자</label>
+                <input className={styles.inputField} value={form.담당자} onChange={e=>handleFormChange('담당자',e.target.value)} />
                 <button
                   type="button"
                   onClick={() => document.getElementById('signatureInput').click()}
-                  style={{ padding: '6px 20px', borderRadius: '6px', border: '1px solid #ccc', background: '#f5f5f5', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}
+                  className={styles.signatureAttachButton}
                 >서명</button>
                 <input
                   id="signatureInput"
                   type="file"
                   accept="image/*"
-                  style={{ display: 'none' }}
+                  className={styles.hiddenInput}
                   onChange={e => {
                     if (e.target.files && e.target.files[0]) {
                       setSignatureFile(e.target.files[0]);
@@ -185,52 +181,50 @@ export default function DataTransfer() {
                 />
               </div>
               {signatureFile && (
-                <div style={{ fontSize: '13px', color: '#007bff', marginBottom: '4px' }}>
+                <div className={styles.signatureFileInfo}>
                   첨부된 서명: {signatureFile.name}
                 </div>
               )}
-              <label className="input-label">이미지</label>
+              <label className={styles.inputLabel}>이미지</label>
               <div>
-                <input id="imgInput" type="file" accept="image/*" style={{display:'none'}} onChange={e=>handleFormChange('이미지',e.target.files[0])} />
-                <div className="file-drop" onClick={()=>document.getElementById('imgInput').click()} style={{height:'100px',lineHeight:'100px',marginBottom:'0'}}>
+                <input id="imgInput" type="file" accept="image/*" className={styles.hiddenInput} onChange={e=>handleFormChange('이미지',e.target.files[0])} />
+                <div className={styles.fileDropTransferImage} onClick={()=>document.getElementById('imgInput').click()}>
                   {form.이미지 ? form.이미지.name : '증거 사진을 업로드하세요.'}
                 </div>
               </div>
-              <div className="form-buttons">
+              <div className={styles.formButtons}>
                 <button onClick={closeModal}>취소</button>
                 <button
                   onClick={handleRegister}
                   disabled={!isFormValid()}
-                  style={{ backgroundColor: isFormValid() ? '#007bff' : '#ccc', color: isFormValid() ? '#fff' : '#888' }}
                 >등록</button>
               </div>
             </div>
           </div>
         </div>
       )}
-      {/* 해시 검증 모달 */}
       {hashModalIdx !== null && (
-        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',zIndex:2100}}>
-          <div className="dt-modal-backdrop" style={{zIndex:2101}} />
-          <div className="upload-box dt-modal-upload-box" style={{zIndex:2102, minWidth:'400px', width:'440px', display:'flex', flexDirection:'column', alignItems:'flex-start', padding:'32px 36px'}}>
-            <p className="upload-title" style={{marginBottom:'18px'}}>해시 검증</p>
-            <div style={{width:'100%', display:'flex', flexDirection:'column', alignItems:'center'}}>
-              <input id="hashFileInput" type="file" style={{display:'none'}} onChange={handleHashFile} />
-              <div className="file-drop" onClick={()=>document.getElementById('hashFileInput').click()} style={{height:'170px',width:'360px',fontSize:'14px',textAlign:'center',display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',gap:'6px',lineHeight:'1.3',marginBottom:'0'}}>
-                <span style={{fontSize:'15px',color:'#444'}}>{evidenceList[hashModalIdx]?.name}</span>
-                <span style={{fontSize:'13px',color:'#888'}}>파일을 업로드하세요.</span>
+        <div className={styles.hashModalOverlay}>
+          <div className={styles.hashModalBackdrop} />
+          <div className={styles.hashModalContent}>
+            <p className={styles.uploadTitleHashModal}>해시 검증</p>
+            <div className={styles.hashFileInputWrapper}>
+              <input id="hashFileInput" type="file" className={styles.hiddenInput} onChange={handleHashFile} />
+              <div className={styles.fileDropHashFile} onClick={()=>document.getElementById('hashFileInput').click()}>
+                <span className={styles.hashFileNameDisplay}>{evidenceList[hashModalIdx]?.name}</span>
+                <span className={styles.hashFilePrompt}>파일을 업로드하세요.</span>
               </div>
             </div>
             {hashError && (
-              <div style={{color:'#d32f2f',marginTop:'18px',fontWeight:'bold',fontSize:'16px',textAlign:'center',width:'100%'}}>해시값이 동일하지 않습니다!</div>
+              <div className={styles.hashErrorText}>해시값이 동일하지 않습니다!</div>
             )}
-            <div className="form-buttons" style={{marginTop:'28px',justifyContent:'flex-end',width:'100%'}}>
-              <button style={{background:'#fff',color:'#222',border:'1px solid #ccc',boxShadow:'0 2px 4px rgba(0,0,0,0.04)'}} onClick={closeHashModal}>취소</button>
+            <div className={styles.formButtonsHashModal}>
+              <button onClick={closeHashModal}>취소</button>
             </div>
           </div>
         </div>
       )}
-      <table className="dt-table">
+      <table className={styles.dtTable}>
         <thead>
           <tr>
             <th>이름</th>
@@ -249,27 +243,27 @@ export default function DataTransfer() {
               <td>{item.date}</td>
               <td>
                 {rowStates[idx]?.transferStatus === 'done' ? (
-                  <span className="dt-status-ok">
-                    <span className="dt-icon-ok">✔</span> {rowStates[idx]?.transfer}
+                  <span className={styles.dtStatusOk}>
+                    <span className={styles.dtIconOk}>✔</span> {rowStates[idx]?.transfer}
                   </span>
                 ) : (
-                  <button className="dt-btn-blue" onClick={() => handleTransferClick(idx)}>
+                  <button className={styles.dtBtnBlue} onClick={() => handleTransferClick(idx)}>
                     {rowStates[idx]?.transfer}
                   </button>
                 )}
               </td>
               <td>
                 {rowStates[idx]?.hashStatus === 'done' ? (
-                  <span className="dt-status-ok">
-                    <span className="dt-icon-ok">✔</span>
+                  <span className={styles.dtStatusOk}>
+                    <span className={styles.dtIconOk}>✔</span>
                   </span>
                 ) : (
-                  <span className="dt-status-fail">✖</span>
+                  <span className={styles.dtStatusFail}>✖</span>
                 )}
               </td>
               <td>
                 {rowStates[idx]?.hashStatus !== 'done' && (
-                  <button className="dt-btn-blue" onClick={() => handleHashClick(idx)}>
+                  <button className={styles.dtBtnBlue} onClick={() => handleHashClick(idx)}>
                     해시 생성
                   </button>
                 )}
@@ -278,21 +272,10 @@ export default function DataTransfer() {
           ))}
         </tbody>
       </table>
-      <div className="dt-bottom-btn">
+      <div className={styles.dtBottomBtn}>
         <button
-          className="dt-next-btn"
+          className={`${styles.dtNextBtn} ${isAllDone ? styles.dtNextBtnActive : ''}`}
           disabled={!isAllDone}
-          style={isAllDone ? {
-            background: '#ffffff',
-            color: '#000000',
-            borderRadius: '999px',
-            fontSize: '20px',
-            padding: '10px 70px',
-            border: "2px solid #cccccc",
-            boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-            cursor: 'pointer',
-            opacity: 1
-          } : {}}
         >다음 단계</button>
       </div>
     </div>

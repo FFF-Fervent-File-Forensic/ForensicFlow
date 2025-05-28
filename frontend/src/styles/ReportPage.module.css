@@ -1,19 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
 
-body {
+:global(body) {
   margin: 0;
   font-family: 'Noto Sans KR', sans-serif;
   background: #f4f4f8;
 }
 
-.report-wrapper {
+.reportWrapper { /* report-wrapper */
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 30px 0;
 }
 
-.report-card {
+.reportCard { /* report-card */
   width: 480px;
   background: white;
   border-radius: 18px;
@@ -22,80 +22,80 @@ body {
   position: relative;
 }
 
-.report-title {
+.reportTitle { /* report-title */
   text-align: center;
   font-size: 18px;
   margin-bottom: 40px;
   font-weight: 500;
 }
 
-.report-section {
+.reportSection { /* report-section */
   margin-bottom: 25px;
 }
 
-.report-section.with-line {
+.withLine { /* report-section.with-line 에서 with-line 부분 */
   border-top: 1px solid #444;
   padding-top: 15px;
 }
 
-.report-labels {
+.reportLabels { /* report-labels */
   font-size: 13px;
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
 }
 
-.report-labels.bold {
+.bold { /* report-labels.bold 에서 bold 부분 */
   font-weight: bold;
 }
 
-.report-values {
+.reportValues { /* report-values */
   font-size: 14px;
   display: flex;
   justify-content: space-between;
 }
 
-.report-bullet {
+.reportBullet { /* report-bullet */
   list-style-type: disc;
   margin-left: 20px;
   font-size: 14px;
 }
 
-.report-bullet li {
+.reportBullet li {
   margin-bottom: 8px;
 }
 
-.report-footer {
+.reportFooter { /* report-footer */
   margin-top: 60px;
   display: flex;
   justify-content: space-between;
   font-size: 14px;
 }
 
-.report-date {
+.reportDate { /* report-date */
   margin-left: 10px;
 }
 
-.report-sign {
+.reportSign { /* report-sign */
   text-align: right;
   line-height: 1.4;
 }
 
-.report-arrows {
+.reportArrows { /* report-arrows */
   display: flex;
   justify-content: center;
   gap: 30px;
   margin-top: 30px;
 }
 
-.report-arrows button {
+.reportArrows button {
   background: none;
   border: none;
   font-size: 16px;
   cursor: pointer;
 }
 
-.download-button {
+.downloadButton { /* download-button */
   margin-top: 20px;
   background-color: #007bff;
   color: white;
@@ -106,4 +106,3 @@ body {
   border-radius: 24px;
   cursor: pointer;
 }
-

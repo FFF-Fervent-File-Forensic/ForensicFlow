@@ -1,4 +1,6 @@
-.input-form-container {
+/* AnalysisInputForm.module.css */
+
+.inputFormContainer { /* input-form-container */
     max-width: 900px;
     margin: 0 auto;
     padding: 40px;
@@ -6,62 +8,62 @@
     border: 1px solid #ccc;
     border-radius: 8px;
   }
-  
-  .input-grid {
+ 
+  .inputGrid { /* input-grid */
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px 40px;
     margin-bottom: 40px;
   }
-  
-  .label-group {
+ 
+  .labelGroup { /* label-group */
     display: flex;
     flex-direction: column;
     font-size: 14px;
   }
-  
-  .label-group label {
+ 
+  .labelGroup label {
     margin-bottom: 6px;
     font-weight: 500;
     color: #333;
   }
-  
-  .label-group span {
+ 
+  .labelGroup span {
     padding: 8px 4px;
   }
-  
-  .label-group input {
+ 
+  .labelGroup input {
     padding: 6px;
     border: 1px solid #aaa;
     border-radius: 4px;
   }
-  
-  .textarea-group {
+ 
+  .textareaGroup { /* textarea-group */
     margin-bottom: 30px;
   }
-  
-  .textarea-group label {
+ 
+  .textareaGroup label {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
     color: #333;
   }
-  
-  .textarea-group textarea {
+ 
+  .textareaGroup textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #aaa;
     border-radius: 4px;
     resize: vertical;
   }
-  
-  .form-buttons {
+ 
+  .formButtons { /* form-buttons */
     display: flex;
     justify-content: flex-end;
     gap: 12px;
   }
-  
-  .save-button {
+ 
+  .saveButton { /* save-button */
     background-color: #0066ff;
     color: white;
     border: none;
@@ -70,8 +72,8 @@
     font-size: 14px;
     cursor: pointer;
   }
-  
-  .complete-button {
+ 
+  .completeButton { /* complete-button */
     background-color: #eee;
     color: #aaa;
     border: none;
@@ -80,8 +82,8 @@
     font-size: 14px;
     cursor: not-allowed;
   }
-  
-  .blur-overlay {
+ 
+  .blurOverlay { /* blur-overlay */
     position: fixed;
     top: 0;
     left: 0;
@@ -92,12 +94,12 @@
     z-index: 900;
     display: none;
   }
-  
-  .blur-overlay.active {
-    display: block;
+
+  .active {
+    display: block !important; /* !important는 다른 스타일에 의해 덮어씌워지는 것을 방지하기 위함 */
   }
-  
-  .modal-box.centered {
+ 
+  .modalBox { /* modal-box */
     position: fixed;
     top: 50%;
     left: 50%;
@@ -110,14 +112,14 @@
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
     z-index: 1000;
   }
-  
-  .modal-title {
+ 
+  .modalTitle { /* modal-title */
     font-size: 18px;
     margin-bottom: 20px;
     font-weight: bold;
   }
-  
-  .upload-area {
+ 
+  .uploadArea { /* upload-area */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -128,4 +130,3 @@
     color: #888;
     font-size: 14px;
   }
-  

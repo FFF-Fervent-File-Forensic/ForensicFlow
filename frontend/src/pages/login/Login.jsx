@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // useNavigate 추가!
-
-import "./Login.css";
+import { Link, useNavigate } from "react-router-dom";
+import styles from "../../styles/Login.module.css";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
 
     const isFormValid = email.trim() !== "" && password.trim() !== "";
 
@@ -23,34 +22,34 @@ function Login() {
     };
 
     return (
-        <div className="center-wrapper">
-            <div className="login-container">
-                <img src="/logo.png" alt="FFF logo" className="logo-image" />
+        <div className={styles["center-wrapper"]}>
+            <div className={styles["login-container"]}>
+                <img src="/logo.png" alt="FFF logo" className={styles["logo-image"]} />
                 <input
                     type="email"
                     placeholder="이메일"
-                    className="input"
+                    className={styles["input"]}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                 />
                 <input
                     type="password"
                     placeholder="비밀번호"
-                    className="input"
+                    className={styles["input"]}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
-                {errorMessage && <div className="error-message">{errorMessage}</div>}
+                {errorMessage && <div className={styles["error-message"]}>{errorMessage}</div>}
                 <button
-                    className={`btn ${isFormValid ? "btn-active" : "btn-disabled"}`}
+                    className={`${styles["btn"]} ${isFormValid ? styles["btn-active"] : styles["btn-disabled"]}`}
                     disabled={!isFormValid}
                     onClick={handleLogin}
                 >
                     로그인
                 </button>
 
-                <div className="link-wrapper">
-                    <Link to="/signup" className="link">회원가입</Link>
+                <div className={styles["link-wrapper"]}>
+                    <Link to="/signup" className={styles["link"]}>회원가입</Link>
                 </div>
             </div>
         </div>
