@@ -1,33 +1,17 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "../styles/AnalysisStepTable.module.css";
+import { useEvidence } from "../contexts/EvidenceContext";
+import styles from "../styles/Analyze.module.css";
 
-export default function AnalysisStepTable() {
-//  const [data, setData] = useState([]);
-const data = [{
-    "name": "CASE001_USB01_E01.img",
-    "owner": "임윤수",
-    "collectedAt": "2025.05.15",
-    "completed": true
-  }]
- 
-//  useEffect(() => {
-//    // 예시 URL입니다. 실제 API 엔드포인트에 맞게 변경하세요.
-//    axios.get("/api/analysis-items")
-//      .then((response) => {
-//        setData(response.data);
-//      })
-//      .catch((error) => {
-//        console.error("데이터 로딩 오류:", error);
-//      });
-//  }, []);
+export default function Analyze() {
+  const { evidenceList } = useEvidence();
   const navigate = useNavigate();
 
-
-  const handleClick = () => {
-    navigate("/Analyzeinput");
+  const handleClick = (index) => {
+    navigate("/Analyzeinput", { state: { selectedIndex: index } });
   };
+
+  const allCompleted = evidenceList.every(item => item.completed);
 
   return (
     <div className={styles.analysisContainer}>
@@ -41,24 +25,29 @@ const data = [{
           </tr>
         </thead>
         <tbody>
-          {data.map((item, idx) => (<tr key={idx}>
+          {evidenceList.map((item, idx) => (
+            <tr key={idx}>
               <td className={styles.alignLeft}>
                 <div className={styles.fileRow}>
                   <span>{item.name}</span>
-                  <button className={styles.inputButton} onClick={handleClick}>
+                  <button className={styles.inputButton} onClick={() => handleClick(idx)}>
                     입력
                   </button>
                 </div>
               </td>
               <td className={styles.alignCenter}>{item.owner}</td>
-              <td className={styles.alignCenter}>{item.collectedAt}</td>
+              <td className={styles.alignCenter}>{item.date}</td>
               <td className={`${styles.alignCenter} ${styles.checkCell}`}>{item.completed ? "✔" : ""}</td>
             </tr>
           ))}
         </tbody>
       </table>
       <div className={styles.footer}>
-        <button className={styles.nextButton} disabled>
+        <button
+          className={`${styles.nextButton} ${allCompleted ? styles.enabled : styles.disabled}`}
+          disabled={!allCompleted}
+          onClick={() => navigate("/ReportPage")}
+        >
           다음단계
         </button>
       </div>
