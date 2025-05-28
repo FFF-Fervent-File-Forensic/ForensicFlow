@@ -1,4 +1,4 @@
-.main-container {
+.mainContainer {
   padding: 20px;
   font-family: 'Pretendard', sans-serif;
 }
@@ -8,7 +8,7 @@
   justify-content: flex-end;
 }
 
-.register-button {
+.registerButton {
   background-color: #007aff;
   color: white;
   border: none;
@@ -18,14 +18,14 @@
   cursor: pointer;
 }
 
-.case-list {
+.caseList {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   margin-top: 32px;
 }
 
-.empty-message {
+.emptyMessage {
   margin: 100px auto;
   margin-top: 200px;
   text-align: center;
@@ -33,7 +33,7 @@
   font-size: 16px;
 }
 
-.case-card {
+.caseCard {
   width: 220px;
   padding: 16px;
   border: 1px solid #ddd;
@@ -41,11 +41,11 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.folder-icon {
+.folderIcon {
   font-size: 24px;
 }
 
-.case-id {
+.caseId {
   font-weight: bold;
   margin: 8px 0;
 }
@@ -55,7 +55,7 @@
   color: #555;
 }
 
-.progress-bar {
+.progressBar {
   background: #e0e0e0;
   height: 8px;
   border-radius: 6px;
@@ -63,13 +63,12 @@
   overflow: hidden;
 }
 
-.progress-fill {
-  width: 40%;
+.progressFill {
   height: 100%;
   background: #007aff;
 }
 
-.modal-overlay {
+.modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -91,7 +90,7 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-.modal-title {
+.modalTitle {
   margin-bottom: 10px;
   text-align: center;
   color: #007aff;
@@ -102,60 +101,56 @@
 .form {
   display: flex;
   flex-direction: column;
-
 }
 
-.form-row {
+.formRow {
   display: flex;
   gap: 50px;
   margin-top: 10px;
   margin-bottom: 0;
 }
 
-.form-col {
+.formCol {
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
 }
 
-.input-label {
+.inputLabel {
   font-size: 13px;
   color: #b0b0b0;
 }
 
-.input-label,
-.input-bottom-line,
-.textarea-bottom-line {
+.inputBottomLine,
+.textareaBottomLine {
   font-family: 'Pretendard', sans-serif;
   font-weight: 400;
 }
 
-.input-bottom-line {
+.inputBottomLine {
   border: none;
   border-bottom: 2px solid #b0b0b0;
-  border-radius: 0;
   background: transparent;
   font-size: 13px;
   outline: none;
   transition: border-color 0.2s;
 }
 
-.input-bottom-line:focus {
+.inputBottomLine:focus {
   border-bottom: 2px solid #007aff;
 }
 
-.input-bottom-line::placeholder,
-.textarea-bottom-line::placeholder {
-  color: #bbb;
+.inputBottomLine::placeholder,
+.textareaBottomLine::placeholder {
+  color: #b0b0b0;
   opacity: 1;
   font-family: 'Pretendard', sans-serif;
-  font-weight: 4 00;
+  font-weight: 400;
 }
 
-.textarea-bottom-line {
+.textareaBottomLine {
   border: 2px solid #b0b0b0;
-  border-radius: 0;
   background: transparent;
   font-size: 13px;
   outline: none;
@@ -164,8 +159,8 @@
   transition: border-color 0.2s;
 }
 
-.textarea-bottom-line:focus {
-  border-bottom: 2px solid #007aff;
+.textareaBottomLine:focus {
+  border: 2px solid #007aff;
 }
 
 .checkbox {
@@ -179,12 +174,12 @@
   margin-top: 3px;
 }
 
-.checkbox-text-group {
+.checkboxTextGroup {
   display: flex;
   flex-direction: column;
 }
 
-.checkbox .main-label {
+.checkbox .mainLabel {
   font-size: 15px;
   font-weight: 500;
   line-height: 1.2;
@@ -197,13 +192,19 @@
   margin-top: 2px;
 }
 
-.align-center {
+.alignCenter {
   align-items: center;
   justify-content: space-between;
   margin-top: 30px;
 }
 
-.add-button {
+.inputBottomLine[type="datetime-local"] {
+  padding-top: 3px;
+  padding-bottom: 1px;
+  line-height: 1.5;
+}
+
+.addButton {
   background-color: #007aff;
   color: white;
   border: none;
@@ -214,12 +215,12 @@
   min-width: 80px;
 }
 
-.add-button:disabled {
+.addButton:disabled {
   background-color: #ddd;
   cursor: not-allowed;
 }
 
-.cancel-button {
+.cancelButton {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -227,11 +228,10 @@
   color: #333;
   border: none;
   font-size: 20px;
-  font-weight: bold;
   cursor: pointer;
 }
 
-.close-button {
+.closeButton {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -243,11 +243,11 @@
   transition: color 0.2s ease;
 }
 
-.close-button:hover {
+.closeButton:hover {
   color: #000;
 }
 
-.upload-modal {
+.uploadModal {
   width: 400px;
   height: 300px;
   background-color: white;
@@ -256,10 +256,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative; /* ✖ 버튼 위치 위해 필요해용 */
+  position: relative;
 }
 
-.upload-box {
+.uploadBox {
   width: 70%;
   height: 60%;
   background-color: #f0f0f0;
@@ -275,11 +275,11 @@
   transition: background-color 0.3s ease;
 }
 
-.upload-box:hover {
+.uploadBox:hover {
   background-color: #e2e2e2;
 }
 
-.remove-file-button {
+.removeFileButton {
   background: transparent;
   border: none;
   color: BLACK;
@@ -289,3 +289,8 @@
   margin-left: 5px;
 }
 
+.uploadedFile {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}

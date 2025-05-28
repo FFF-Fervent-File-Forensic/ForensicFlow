@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Main.css';
+import styles from '../styles/Main.module.css'; // CSS Module import
 
 function Main() {
   const [caseList, setCaseList] = useState([]);
@@ -35,6 +35,10 @@ function Main() {
   };
 
   const handleAddCase = () => {
+    if (caseList.some(c => c.id === formData.caseNumber)) {
+      alert("이미 등록된 사건 번호입니다.");
+      return;
+    }
     const newCase = {
       id: formData.caseNumber,
       progress: progressStages[0].stage,
@@ -69,28 +73,28 @@ function Main() {
   };
 
   return (
-    <div className="main-container">
-      <div className="header">
-        <button className="register-button" onClick={() => setShowModal(true)}>
+    <div className={styles.mainContainer}>
+      <div className={styles.header}>
+        <button className={styles.registerButton} onClick={() => setShowModal(true)}>
           ⊕ 사건 등록
         </button>
       </div>
 
-      <div className="case-list">
+      <div className={styles.caseList}>
         {caseList.length === 0 ? (
-          <div className="empty-message">
+          <div className={styles.emptyMessage}>
             등록된 사건 폴더가 없습니다.<br />
             ‘사건 등록’ 버튼을 눌러 폴더를 생성해주세요
           </div>
         ) : (
           caseList.map((c) => (
-            <div className="case-card" key={c.id}>
-              <div className="folder-icon">📁</div>
-              <div className="case-id">{c.id}</div>
-              <div className="progress">{c.progress}</div>
-              <div className="progress-bar">
+            <div className={styles.caseCard} key={c.id}>
+              <div className={styles.folderIcon}>📁</div>
+              <div className={styles.caseId}>{c.id}</div>
+              <div className={styles.progress}>{c.progress}</div>
+              <div className={styles.progressBar}>
                 <div
-                  className="progress-fill"
+                  className={styles.progressFill}
                   style={{ width: `${c.progressPercent}%` }}
                 />
               </div>
@@ -101,120 +105,120 @@ function Main() {
 
       {/* 사건 등록 모달 */}
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <button className="cancel-button" onClick={() => setShowModal(false)}>✖</button>
-            <h2 className="modal-title">사건 등록</h2>
-            <form className="form" onSubmit={e => { e.preventDefault(); handleAddCase(); }}>
-              <div className="form-row">
-                <div className="form-col">
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <button className={styles.cancelButton} onClick={() => setShowModal(false)}>✖</button>
+            <h2 className={styles.modalTitle}>사건 등록</h2>
+            <form className={styles.form} onSubmit={e => { e.preventDefault(); handleAddCase(); }}>
+              <div className={styles.formRow}>
+                <div className={styles.formCol}>
                   <input
                     type="text"
                     name="caseNumber"
                     value={formData.caseNumber}
                     onChange={handleInputChange}
                     placeholder="사건 번호"
-                    className="input-bottom-line"
+                    className={styles.inputBottomLine}
                   />
                 </div>
-                <div className="form-col">
+                <div className={styles.formCol}>
                   <input
                     type="text"
                     name="caseType"
                     value={formData.caseType}
                     onChange={handleInputChange}
                     placeholder="사건 유형"
-                    className="input-bottom-line"
+                    className={styles.inputBottomLine}
                   />
                 </div>
               </div>
-              <div className="form-row">
-                <div className="form-col">
+              <div className={styles.formRow}>
+                <div className={styles.formCol}>
                   <input
                     type="text"
                     name="location"
                     value={formData.location}
                     onChange={handleInputChange}
                     placeholder="사건 발생 위치"
-                    className="input-bottom-line"
+                    className={styles.inputBottomLine}
                   />
                 </div>
-                <div className="form-col">
-                  <label className="input-label">사건 발생 일시</label>
+                <div className={styles.formCol}>
+                  <label className={styles.inputLabel}>사건 발생 일시</label>
                   <input
                     type="datetime-local"
                     name="incidentDateTime"
                     value={formData.incidentDateTime}
                     onChange={handleInputChange}
-                    className="input-bottom-line"
+                    className={styles.inputBottomLine}
                   />
                 </div>
               </div>
-              <div className="form-row">
-                <div className="form-col">
-                  <label className="input-label">사건 개요</label>
+              <div className={styles.formRow}>
+                <div className={styles.formCol}>
+                  <label className={styles.inputLabel}>사건 개요</label>
                   <textarea
                     name="summary"
                     value={formData.summary}
                     onChange={handleInputChange}
-                    className="textarea-bottom-line"
+                    className={styles.textareaBottomLine}
                   />
                 </div>
               </div>
-              <div className="form-row">
-                <div className="form-col">
-                  <label className="input-label">관련자 정보</label>
+              <div className={styles.formRow}>
+                <div className={styles.formCol}>
+                  <label className={styles.inputLabel}>관련자 정보</label>
                   <textarea
                     name="persons"
                     value={formData.persons}
                     onChange={handleInputChange}
-                    className="textarea-bottom-line"
+                    className={styles.textareaBottomLine}
                   />
                 </div>
               </div>
-              <div className="form-row">
-                <div className="form-col">
+              <div className={styles.formRow}>
+                <div className={styles.formCol}>
                   <input
                     type="text"
                     name="agency"
                     value={formData.agency}
                     onChange={handleInputChange}
                     placeholder="의뢰 기관"
-                    className="input-bottom-line"
+                    className={styles.inputBottomLine}
                   />
                 </div>
-                <div className="form-col">
-                  <label className="input-label">의뢰 일시</label>
+                <div className={styles.formCol}>
+                  <label className={styles.inputLabel}>의뢰 일시</label>
                   <input
                     type="datetime-local"
                     name="requestDateTime"
                     value={formData.requestDateTime}
                     onChange={handleInputChange}
-                    className="input-bottom-line"
+                    className={styles.inputBottomLine}
                   />
                 </div>
               </div>
-              <div className="form-row align-center">
-                <label className="checkbox" onClick={() => setShowLegalUploadModal(true)}>
+              <div className={`${styles.formRow} ${styles.alignCenter}`}> {/* 여러 클래스 적용 예시 */}
+                <label className={styles.checkbox} onClick={() => setShowLegalUploadModal(true)}>
                   <input
                     type="checkbox"
                     name="legalPower"
                     checked={formData.legalPower}
                     readOnly
                   />
-                  <div className="checkbox-text-group">
-                    <div className="main-label">법적 권한</div>
-                    <div className="subtext">압수수색영장, 피고인 사실확인서 등</div>
+                  <div className={styles.checkboxTextGroup}>
+                    <div className={styles.mainLabel}>법적 권한</div>
+                    <div className={styles.subtext}>압수수색영장, 피고인 사실확인서 등</div>
                   </div>
                 </label>
                 {formData.legalPower && legalFile && (
-                  <div className="uploaded-file">
+                  <div className={styles.uploadedFile}>
                     {legalFile.name}
-                    <button className="remove-file-button" onClick={handleRemoveLegalFile}>✖</button>
+                    <button className={styles.removeFileButton} onClick={handleRemoveLegalFile}>✖</button>
                   </div>
                 )}
                 <button
-                  className="add-button"
+                  className={styles.addButton}
                   type="submit"
                   disabled={!formData.caseNumber}
                   style={{
@@ -231,16 +235,16 @@ function Main() {
       )}
       
       {showLegalUploadModal && (
-        <div className="modal-overlay">
-          <div className="upload-modal">
+        <div className={styles.modalOverlay}>
+          <div className={styles.uploadModal}>
             <button
-              className="close-button"
+              className={styles.closeButton}
               onClick={() => setShowLegalUploadModal(false)}
             >
               ✖
             </button>
 
-            <label htmlFor="legalFileUpload" className="upload-box">
+            <label htmlFor="legalFileUpload" className={styles.uploadBox}>
               파일을 업로드하세요.
             </label>
             <input

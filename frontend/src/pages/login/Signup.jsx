@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Login.css";
+import styles from "../../styles/Login.module.css";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -23,47 +23,46 @@ function Signup() {
       return;
     }
     setErrorMessage("");
-    // 추후 백엔드 연결 시 fetch("/api/signup") 등으로 연결하면 돼요!
     console.log("회원가입 성공 (프론트단 테스트)");
   };
 
   return (
-    <div className="center-wrapper">
-      <div className="login-container">
-        <img src="/logo.png" alt="FFF logo" className="logo-image" />
+    <div className={styles["center-wrapper"]}>
+      <div className={styles["login-container"]}>
+        <img src="/logo.png" alt="FFF logo" className={styles["logo-image"]} />
         <input
           type="text"
           placeholder="이름"
-          className="input"
+          className={styles["input"]}
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
         <input
           type="email"
           placeholder="이메일"
-          className="input"
+          className={styles["input"]}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           type="password"
           placeholder="비밀번호"
-          className="input"
+          className={styles["input"]}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
         <input
           type="password"
           placeholder="비밀번호 확인"
-          className="input"
+          className={styles["input"]}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
         {!isPasswordMatch && (
-          <div className="error-message">비밀번호가 일치하지 않습니다.</div>
+          <div className={styles["error-message"]}>비밀번호가 일치하지 않습니다.</div>
         )}
         <button
-          className={`btn ${isFormValid ? "btn-active" : "btn-disabled"}`}
+          className={`${styles["btn"]} ${isFormValid ? styles["btn-active"] : styles["btn-disabled"]}`}
           disabled={!isFormValid}
           onClick={handleSignup}
         >
