@@ -193,8 +193,9 @@
 .inputRow {
   display: flex;
   align-items: center;
-  gap: 0px; /* Default gap */
+  border-bottom: 2px solid #858585; /* 한 줄로 연결된 밑줄 */
   margin-bottom: 0;
+  padding-bottom: 2px; /* 밑줄과 내용 간격 */
 }
 
 .inputRowGap8 {
@@ -204,26 +205,25 @@
 
 .inputLabel {
   font-size: 14px;
-  min-width: 40px; /* Adjusted from visual inspection, original was wider in context */
-  color: #222;
+  min-width: 80px; /* 라벨 길이 조정 */
+  color: #888;
   margin-bottom: 0;
   margin-top: 0;
   white-space: nowrap;
+  padding-right: 8px;
+  /* border, background 없음 */
 }
 
 .inputField {
   width: 100%;
-  padding: 0px 3px;
-  margin-top: 2px;
-  margin-bottom: 2px;
   border: none;
-  border-bottom: 2px solid #858585;
-  border-top: none;
-  border-left: none;
-  border-right: none;
+  outline: none;
   font-size: 15px;
-  box-sizing: border-box;
   background: #fff;
+  padding: 4px 0;
+  margin: 0;
+  /* 밑줄 제거 */
+  box-shadow: none;
 }
 
 .inputField[type="datetime-local"] {
@@ -307,12 +307,21 @@
 }
 
 .fileDrop {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 120px;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  background-color: #e3e3e3;
   text-align: center;
-  border: 1px dashed #ccc; /* Example border, adjust as needed */
+  color: #666;
   cursor: pointer;
+  transition: border-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fileDrop:hover {
+  border-color: #0066ff;
 }
 
 .fileDropTransferImage {
