@@ -1,11 +1,18 @@
 /* DataTransfer.module.css */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
 .dtContainer {
-  width: 100vw;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 60px;
+  flex-direction: column;
   position: relative; /* Added from inline style */
 }
 
@@ -147,6 +154,8 @@
 
 .transferModalContent {
   composes: modalContent;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 20px 32px;
   width: 640px;
   min-width: 540px;

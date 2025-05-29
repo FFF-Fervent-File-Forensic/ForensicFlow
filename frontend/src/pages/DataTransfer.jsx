@@ -42,11 +42,13 @@ export default function DataTransfer() {
     setModalIdx(idx);
     setForm(initialTransferForm);
     setSignatureFile(null);
+    document.body.style.overflow = 'hidden';
   };
   const closeModal = () => {
     setModalIdx(null);
     setForm(initialTransferForm);
     setSignatureFile(null);
+    document.body.style.overflow = 'auto';
   };
 
   const openHashModal = (idx) => {
