@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import styles from '../styles/Main.module.css'; // CSS Module import
+import { useNavigate } from 'react-router-dom';
 
 function Main() {
   const [caseList, setCaseList] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showLegalUploadModal, setShowLegalUploadModal] = useState(false);
   const [legalFile, setLegalFile] = useState(null);
+
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     caseNumber: '',
@@ -87,19 +90,24 @@ function Main() {
             ‘사건 등록’ 버튼을 눌러 폴더를 생성해주세요
           </div>
         ) : (
-          caseList.map((c) => (
-            <div className={styles.caseCard} key={c.id}>
-              <div className={styles.folderIcon}>📁</div>
-              <div className={styles.caseId}>{c.id}</div>
-              <div className={styles.progress}>{c.progress}</div>
-              <div className={styles.progressBar}>
-                <div
-                  className={styles.progressFill}
-                  style={{ width: `${c.progressPercent}%` }}
-                />
+            caseList.map((c) => (
+              <div
+                className={styles.caseCard}
+                key={c.id}
+                onClick={() => navigate("/register")}
+                style={{ cursor: 'pointer' }}
+              >
+                <div className={styles.folderIcon}>📁</div>
+                <div className={styles.caseId}>{c.id}</div>
+                <div className={styles.progress}>{c.progress}</div>
+                <div className={styles.progressBar}>
+                  <div
+                    className={styles.progressFill}
+                    style={{ width: `${c.progressPercent}%` }}
+                  />
+                </div>
               </div>
-            </div>
-          ))
+            ))
         )}
       </div>
 

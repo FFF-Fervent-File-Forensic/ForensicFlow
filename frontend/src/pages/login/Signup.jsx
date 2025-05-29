@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styles from "../../styles/Login.module.css";
+import { useNavigate } from "react-router-dom";
 
 function Signup() {
   const [name, setName] = useState("");
@@ -7,6 +8,8 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+
+  const navigate = useNavigate();
 
   const isPasswordMatch = password === confirmPassword;
   const isFormFilled =
@@ -23,7 +26,10 @@ function Signup() {
       return;
     }
     setErrorMessage("");
-    console.log("회원가입 성공 (프론트단 테스트)");
+    console.log("회원가입 완료");
+    
+    alert("회원가입이 완료되었습니다!");
+    navigate("/");
   };
 
   return (
