@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useEffect } from 'react'; 
+
 import styles from '../styles/Main.module.css'; // CSS Module import
 import { useNavigate } from 'react-router-dom';
 
@@ -74,6 +76,22 @@ function Main() {
     setLegalFile(null);
     setFormData({ ...formData, legalPower: false });
   };
+
+  // 데모용 사건 추가 (이후 제거)
+  useEffect(() => {
+    setCaseList(prev => {
+      if (prev.some(c => c.id === 'DF-2025-0413-001')) return prev;
+
+      return [
+        ...prev,
+        {
+          id: 'DF-2025-0413-001',
+          progress: '증거 수집 중',
+          progressPercent: 10,
+        },
+      ];
+    });
+  }, []);
 
   return (
     <div className={styles.mainContainer}>
