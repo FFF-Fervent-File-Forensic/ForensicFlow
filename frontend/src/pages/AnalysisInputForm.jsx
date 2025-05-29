@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useEvidence } from "../contexts/EvidenceContext";
 import styles from "../styles/AnalysisInputForm.module.css";
 
 export default function AnalysisInputForm() {
@@ -14,6 +15,10 @@ export default function AnalysisInputForm() {
 
   const [showModal, setShowModal] = useState(false);
   const [file, setFile] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const selectedIndex = location.state?.selectedIndex;
+  const { evidenceList, setEvidenceList } = useEvidence();
 
   const isComplete = Object.values(form).every((v) => v.trim() !== "");
 
@@ -27,20 +32,7 @@ export default function AnalysisInputForm() {
       setShowModal(true);
       return;
     }
-    sendForm("임시저장");
-  };
-
-  const sendForm = (status) => {
-    const payload = { ...form, status };
-    axios.post("/api/analysis-submit", payload)
-      .then(() => {
-        alert(status === "완료" ? "완료되었습니다." : "임시 저장되었습니다.");
-        setShowModal(false);
-      })
-      .catch((error) => {
-        console.error("제출 실패:", error);
-        alert("제출 중 오류가 발생했습니다.");
-      });
+    alert("임시 저장되었습니다.");
   };
 
   const handleFileChange = (e) => {
@@ -52,21 +44,42 @@ export default function AnalysisInputForm() {
       alert("파일을 선택해주세요.");
       return;
     }
-    sendForm("완료");
+    if (file.name !== "만능키.txt") {
+      alert("'검증 실패.");
+      return;
+    }
+
+    const updatedList = evidenceList.map((item, idx) =>
+      idx === selectedIndex ? { ...item, completed: true } : item
+    );
+    setEvidenceList(updatedList);
+
+    alert("검증 성공.");
+    navigate("/analyze");
+  };
+
+  const handleOverlayClick = () => {
+    setShowModal(false);
+    setFile(null);
   };
 
   return (
     <div className={styles.inputFormContainer}>
-      <div className={`${styles.blurOverlay} ${showModal ? styles.active : ""}`}></div>
+      {showModal && (
+        <div
+          className={styles.blurOverlay + ' ' + styles.active}
+          onClick={handleOverlayClick}
+        ></div>
+      )}
 
       <div className={styles.inputGrid}>
         <div className={styles.labelGroup}>
           <label>분석 대상:</label>
-          <span>CASE001_USB01_E01.img</span>
+          <span>{evidenceList[selectedIndex]?.name || "-"}</span>
         </div>
         <div className={styles.labelGroup}>
           <label>증거 종류:</label>
-          <span>image file</span>
+          <span>{evidenceList[selectedIndex]?.type || "-"}</span>
         </div>
 
         <div className={styles.labelGroup}>
@@ -110,13 +123,14 @@ export default function AnalysisInputForm() {
       </div>
 
       {showModal && (
-        <div className={`${styles.modalBox} ${styles.centered}`}>
+        <div className={`${styles.modalBox} ${styles.centered}`} onClick={(e) => e.stopPropagation()}>
           <h3 className={styles.modalTitle}>해시 검증</h3>
           <div className={styles.modalUpload}>
             <label className={styles.uploadArea}>
               <input type="file" style={{ display: 'none' }} onChange={handleFileChange} />
               파일을 업로드하세요.
             </label>
+            {file && <p className={styles.fileName}>업로드한 파일: {file.name}</p>}
           </div>
           <div className={styles.formButtons} style={{ justifyContent: 'center', marginTop: '20px' }}>
             <button className={styles.saveButton} onClick={handleUploadAndSubmit}>제출</button>
