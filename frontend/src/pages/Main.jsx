@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { useEffect } from 'react'; 
-
-import styles from '../styles/Main.module.css'; // CSS Module import
+import React, { useState, useEffect } from 'react';
+import styles from '../styles/Main.module.css';
 import { useNavigate } from 'react-router-dom';
+import { useEvidence } from '../contexts/EvidenceContext';
 
 function Main() {
   const [caseList, setCaseList] = useState([]);
@@ -11,6 +10,7 @@ function Main() {
   const [legalFile, setLegalFile] = useState(null);
 
   const navigate = useNavigate();
+  const { addCaseInfo } = useEvidence();
 
   const [formData, setFormData] = useState({
     caseNumber: '',
@@ -44,12 +44,19 @@ function Main() {
       alert("이미 등록된 사건 번호입니다.");
       return;
     }
+
     const newCase = {
       id: formData.caseNumber,
       progress: progressStages[0].stage,
       progressPercent: progressStages[0].percent,
       ...formData,
     };
+
+    // EvidenceContext에 저장
+    addCaseInfo({
+      ...formData,
+      legalFile: legalFile,
+    });
 
     setCaseList([...caseList, {
       id: newCase.id,
@@ -77,11 +84,9 @@ function Main() {
     setFormData({ ...formData, legalPower: false });
   };
 
-  // 데모용 사건 추가 (이후 제거)
   useEffect(() => {
     setCaseList(prev => {
       if (prev.some(c => c.id === 'DF-2025-0413-001')) return prev;
-
       return [
         ...prev,
         {
@@ -108,28 +113,27 @@ function Main() {
             ‘사건 등록’ 버튼을 눌러 폴더를 생성해주세요
           </div>
         ) : (
-            caseList.map((c) => (
-              <div
-                className={styles.caseCard}
-                key={c.id}
-                onClick={() => navigate("/register")}
-                style={{ cursor: 'pointer' }}
-              >
-                <div className={styles.folderIcon}>📁</div>
-                <div className={styles.caseId}>{c.id}</div>
-                <div className={styles.progress}>{c.progress}</div>
-                <div className={styles.progressBar}>
-                  <div
-                    className={styles.progressFill}
-                    style={{ width: `${c.progressPercent}%` }}
-                  />
-                </div>
+          caseList.map((c) => (
+            <div
+              className={styles.caseCard}
+              key={c.id}
+              onClick={() => navigate("/register")}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className={styles.folderIcon}>📁</div>
+              <div className={styles.caseId}>{c.id}</div>
+              <div className={styles.progress}>{c.progress}</div>
+              <div className={styles.progressBar}>
+                <div
+                  className={styles.progressFill}
+                  style={{ width: `${c.progressPercent}%` }}
+                />
               </div>
-            ))
+            </div>
+          ))
         )}
       </div>
 
-      {/* 사건 등록 모달 */}
       {showModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -224,7 +228,7 @@ function Main() {
                   />
                 </div>
               </div>
-              <div className={`${styles.formRow} ${styles.alignCenter}`}> {/* 여러 클래스 적용 예시 */}
+              <div className={`${styles.formRow} ${styles.alignCenter}`}>
                 <label className={styles.checkbox} onClick={() => setShowLegalUploadModal(true)}>
                   <input
                     type="checkbox"
@@ -259,7 +263,7 @@ function Main() {
           </div>
         </div>
       )}
-      
+
       {showLegalUploadModal && (
         <div className={styles.modalOverlay}>
           <div className={styles.uploadModal}>
@@ -269,7 +273,6 @@ function Main() {
             >
               ✖
             </button>
-
             <label htmlFor="legalFileUpload" className={styles.uploadBox}>
               파일을 업로드하세요.
             </label>

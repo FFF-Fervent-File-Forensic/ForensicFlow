@@ -1,3 +1,4 @@
+//frontend\src\pages\AnalysisInputForm.jsx
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEvidence } from "../contexts/EvidenceContext";
@@ -17,8 +18,22 @@ export default function AnalysisInputForm() {
   const [file, setFile] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const selectedIndex = location.state?.selectedIndex;
-  const { evidenceList, setEvidenceList } = useEvidence();
+
+  // 수정: selectedIndex 대신 evidenceName을 받음
+  const evidenceNameFromState = location.state?.evidenceName;
+
+  // 수정: evidenceInfo와 addAnalysisInfo를 context에서 가져옴
+  const { evidenceInfo, addAnalysisInfo } = useEvidence();
+
+  // 수정: evidenceName을 사용하여 현재 증거 정보를 찾음
+  const [currentEvidence, setCurrentEvidence] = useState(null);
+
+  useEffect(() => {
+    if (evidenceNameFromState && evidenceInfo) {
+      const foundEvidence = evidenceInfo.find(ev => ev.name === evidenceNameFromState);
+      setCurrentEvidence(foundEvidence);
+    }
+  }, [evidenceNameFromState, evidenceInfo]);
 
   const isComplete = Object.values(form).every((v) => v.trim() !== "");
 
@@ -29,9 +44,11 @@ export default function AnalysisInputForm() {
 
   const handleSubmit = (type) => {
     if (type === "complete") {
+      if (!isComplete) return; // 모든 필드가 채워지지 않으면 모달을 띄우지 않음
       setShowModal(true);
       return;
     }
+    // 임시 저장 기능은 그대로 유지
     alert("임시 저장되었습니다.");
   };
 
@@ -44,24 +61,42 @@ export default function AnalysisInputForm() {
       alert("파일을 선택해주세요.");
       return;
     }
+    // 기존 해시 검증 로직 유지 (만능키.txt)
     if (file.name !== "만능키.txt") {
-      alert("'검증 실패.");
+      alert("검증 실패.");
+      // 실패 시 모달을 닫거나 사용자에게 다른 액션을 안내할 수 있습니다.
+      // 여기서는 간단히 alert 후 리턴합니다.
+      // setShowModal(false); // 필요에 따라 모달을 닫을 수 있습니다.
+      // setFile(null);
       return;
     }
 
-    const updatedList = evidenceList.map((item, idx) =>
-      idx === selectedIndex ? { ...item, completed: true } : item
-    );
-    setEvidenceList(updatedList);
-
+    // 해시 검증 성공 시
     alert("검증 성공.");
-    navigate("/analyze");
+
+    // 수정: addAnalysisInfo를 호출하여 분석 정보를 context에 저장
+    if (currentEvidence) {
+      addAnalysisInfo(currentEvidence.name, form);
+    }
+
+    setShowModal(false); // 모달 닫기
+    setFile(null); // 파일 상태 초기화
+    navigate("/analyze"); // Analyze 페이지로 이동
   };
 
   const handleOverlayClick = () => {
     setShowModal(false);
     setFile(null);
   };
+
+  if (!currentEvidence && evidenceNameFromState) {
+    // currentEvidence를 찾는 중이거나, 유효하지 않은 evidenceName일 경우 로딩 또는 에러 처리
+    return <div>Loading evidence data or invalid evidence selected...</div>;
+  }
+  if (!evidenceNameFromState) {
+      return <div>No evidence selected. Please go back to the analyze page.</div>
+  }
+
 
   return (
     <div className={styles.inputFormContainer}>
@@ -75,11 +110,13 @@ export default function AnalysisInputForm() {
       <div className={styles.inputGrid}>
         <div className={styles.labelGroup}>
           <label>분석 대상:</label>
-          <span>{evidenceList[selectedIndex]?.name || "-"}</span>
+          {/* 수정: currentEvidence에서 이름 표시 */}
+          <span>{currentEvidence?.name || "-"}</span>
         </div>
         <div className={styles.labelGroup}>
           <label>증거 종류:</label>
-          <span>{evidenceList[selectedIndex]?.type || "-"}</span>
+          {/* 수정: currentEvidence에서 종류 표시 */}
+          <span>{currentEvidence?.type || "-"}</span>
         </div>
 
         <div className={styles.labelGroup}>
@@ -114,7 +151,7 @@ export default function AnalysisInputForm() {
       <div className={styles.formButtons}>
         <button className={styles.saveButton} onClick={() => handleSubmit("save")}>임시 저장</button>
         <button
-          className={isComplete ? styles.saveButton : styles.completeButton}
+          className={isComplete ? styles.saveButton : styles.completeButton} // 스타일은 유지하되, saveButton과 completeButton 클래스명이 동일한 효과를 내도록 CSS 확인 필요
           disabled={!isComplete}
           onClick={() => handleSubmit("complete")}
         >
@@ -133,7 +170,7 @@ export default function AnalysisInputForm() {
             {file && <p className={styles.fileName}>업로드한 파일: {file.name}</p>}
           </div>
           <div className={styles.formButtons} style={{ justifyContent: 'center', marginTop: '20px' }}>
-            <button className={styles.saveButton} onClick={handleUploadAndSubmit}>제출</button>
+            <button className={styles.saveButton} onClick={handleUploadAndSubmit} disabled={!file}>제출</button>
           </div>
         </div>
       )}
