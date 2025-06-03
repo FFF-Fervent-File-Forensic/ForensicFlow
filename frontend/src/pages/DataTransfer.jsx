@@ -88,30 +88,53 @@ export default function DataTransfer() {
       states.map((item, i) =>
         i === modalIdx
           ? {
-              ...item,
-              transfer: '이송 정보 확인',
-              transferStatus: 'done',
-              transferData,
-            }
+            ...item,
+            transfer: '이송 정보 확인',
+            transferStatus: 'done',
+            transferData,
+          }
           : item
       )
     );
     closeModal();
   };
 
-  const handleHashFile = (e) => {
+  const handleHashFile = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     setHashFile(file);
-    const evidenceName = evidenceInfo[hashModalIdx]?.name;
-    if (file.name === evidenceName || file.name === '만능키.txt') {
-      setRowStates((states) =>
-        states.map((item, i) =>
-          i === hashModalIdx ? { ...item, hashStatus: 'done' } : item
-        )
-      );
-      closeHashModal();
-    } else {
+    setHashError(false);
+
+    // 선택된 증거 해시값 가져오기
+    const storedHash = evidenceInfo[hashModalIdx]?.hash;
+    if (!storedHash) {
+      setHashError(true);
+      return;
+    }
+
+    try {
+      //해시 계산
+      const arrayBuffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const uploadedFileHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      if (uploadedFileHash === storedHash) {
+        // 해시가 일치하면 상태 업데이트 및 모달 닫기
+        //alert(storedHash + uploadedFileHash); 해시값 확인 alert
+        setRowStates(states =>
+          states.map((item, i) =>
+            i === hashModalIdx ? { ...item, hashStatus: 'done' } : item
+          )
+        );
+        closeHashModal();
+      } else {
+        // 불일치 시 에러 표시
+        setHashError(true);
+      }
+    } catch (error) {
+      console.error('해시 계산 중 오류:', error);
       setHashError(true);
     }
   };

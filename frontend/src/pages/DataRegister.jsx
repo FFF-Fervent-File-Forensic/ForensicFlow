@@ -30,16 +30,26 @@ export default function EvidenceManager() {
   const [formData, setFormData] = useState(initialFormData);
   const navigate = useNavigate();
 
-  const handleFileSelect = (e) => {
+  // Web Crypto API로 SHA-256 해시 계산 함수
+  const calculateHash = async (file) => {
+    const arrayBuffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  };
+
+  const handleFileSelect = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const fakeHash = file.name;
       const sizeInGB = (file.size / (1024 ** 3)).toFixed(2);
       setSelectedFile(file);
+      const fileHash = await calculateHash(file);
+      //alert(fileHash); 해시값 확인 alert
       setFormData({
         ...initialFormData,
         name: file.name,
-        hash: fakeHash,
+        hash: fileHash,
         size: `${sizeInGB} GB`,
       });
     }
