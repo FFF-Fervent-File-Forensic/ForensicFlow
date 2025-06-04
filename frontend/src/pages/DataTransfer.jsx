@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styles from '../styles/DataTransfer.module.css';
 import { useEvidence } from '../contexts/EvidenceContext';
 import { useNavigate } from 'react-router-dom';
+import HashVerifierFooter from '../components/HashVerifierFooter';
 
 const initialTransferForm = {
   출발위치: '',
@@ -20,7 +21,7 @@ const initialTransferForm = {
 };
 
 export default function DataTransfer() {
-  const { evidenceInfo, addTransferInfo } = useEvidence(); // ✅ 수정된 Context 변수명 사용
+  const { evidenceInfo, addTransferInfo } = useEvidence();
   const [rowStates, setRowStates] = useState(
     evidenceInfo.map(() => ({
       transfer: '이송 정보 기입',
@@ -33,8 +34,6 @@ export default function DataTransfer() {
   const [form, setForm] = useState(initialTransferForm);
   const [signatureFile, setSignatureFile] = useState(null);
   const [hashModalIdx, setHashModalIdx] = useState(null);
-  const [hashFile, setHashFile] = useState(null);
-  const [hashError, setHashError] = useState(false);
   const navigate = useNavigate();
 
   const openModal = (idx) => {
@@ -43,22 +42,12 @@ export default function DataTransfer() {
     setSignatureFile(null);
     document.body.style.overflow = 'hidden';
   };
+
   const closeModal = () => {
     setModalIdx(null);
     setForm(initialTransferForm);
     setSignatureFile(null);
     document.body.style.overflow = 'auto';
-  };
-
-  const openHashModal = (idx) => {
-    setHashModalIdx(idx);
-    setHashFile(null);
-    setHashError(false);
-  };
-  const closeHashModal = () => {
-    setHashModalIdx(null);
-    setHashFile(null);
-    setHashError(false);
   };
 
   const handleFormChange = (key, value) => {
@@ -99,21 +88,31 @@ export default function DataTransfer() {
     closeModal();
   };
 
-  const handleHashFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setHashFile(file);
-    const evidenceName = evidenceInfo[hashModalIdx]?.name;
-    if (file.name === evidenceName || file.name === '만능키.txt') {
-      setRowStates((states) =>
-        states.map((item, i) =>
-          i === hashModalIdx ? { ...item, hashStatus: 'done' } : item
-        )
-      );
-      closeHashModal();
-    } else {
-      setHashError(true);
-    }
+  // 해시 검증 성공 콜백
+  const onHashValid = () => {
+    setRowStates((states) =>
+      states.map((item, i) =>
+        i === hashModalIdx ? { ...item, hashStatus: 'done' } : item
+      )
+    );
+    setHashModalIdx(null);
+  };
+
+  // 해시 검증 실패 콜백
+  const onHashInvalid = () => {
+    alert('해시가 일치하지 않습니다!');
+  };
+
+  // 해시 검증 모달 열기
+  const openHashModal = (idx) => {
+    setHashModalIdx(idx);
+    document.body.style.overflow = 'hidden';
+  };
+
+  // 해시 검증 모달 닫기
+  const closeHashModal = () => {
+    setHashModalIdx(null);
+    document.body.style.overflow = 'auto';
   };
 
   const isAllDone = rowStates.every(
@@ -122,7 +121,7 @@ export default function DataTransfer() {
 
   return (
     <div className={styles.dtContainer}>
-      {/* 이송 모달 */}
+      {/* 이송 정보 입력 모달 */}
       {modalIdx !== null && (
         <div className={styles.transferModalOverlay}>
           <div className={styles.transferModalBackdrop} />
@@ -148,12 +147,7 @@ export default function DataTransfer() {
                   <input type="datetime-local" className={styles.inputField} value={form.도착일시} onChange={e => handleFormChange('도착일시', e.target.value)} />
                 </div>
               </div>
-              {/* 발신자, 이송자, 수령자, 담당자 입력 */}
-              {[
-                ['발신자', '발신자연락처'],
-                ['이송자', '이송자연락처'],
-                ['수령자', '수령자연락처'],
-              ].map(([a, b]) => (
+              {[['발신자', '발신자연락처'], ['이송자', '이송자연락처'], ['수령자', '수령자연락처']].map(([a, b]) => (
                 <div className={styles.formRow} key={a}>
                   <div className={styles.inputRow}>
                     <label className={styles.inputLabel}>{a}</label>
@@ -200,19 +194,18 @@ export default function DataTransfer() {
         </div>
       )}
 
+      {/* 해시 검증 모달 */}
       {hashModalIdx !== null && (
         <div className={styles.hashModalOverlay}>
           <div className={styles.hashModalBackdrop} />
           <div className={styles.hashModalContent}>
-            <p className={styles.uploadTitleHashModal}>해시 검증</p>
-            <div className={styles.hashFileInputWrapper}>
-              <input id="hashFileInput" type="file" className={styles.hiddenInput} onChange={handleHashFile} />
-              <div className={styles.fileDropHashFile} onClick={() => document.getElementById('hashFileInput').click()}>
-                <span className={styles.hashFileNameDisplay}>{evidenceInfo[hashModalIdx]?.name}</span>
-                <span className={styles.hashFilePrompt}>파일을 업로드하세요.</span>
-              </div>
-            </div>
-            {hashError && <div className={styles.hashErrorText}>해시값이 동일하지 않습니다!</div>}
+            <p className={styles.uploadTitle}>해시 검증</p>
+            <HashVerifierFooter
+              storedHash={evidenceInfo[hashModalIdx]?.hash}
+              onValid={onHashValid}
+              onInvalid={onHashInvalid}
+              disabled={false}
+            />
             <div className={styles.formButtonsHashModal}>
               <button onClick={closeHashModal}>취소</button>
             </div>
@@ -220,7 +213,6 @@ export default function DataTransfer() {
         </div>
       )}
 
-      {/* 테이블 */}
       <table className={styles.dtTable}>
         <thead>
           <tr>
@@ -254,7 +246,7 @@ export default function DataTransfer() {
               </td>
               <td>
                 {rowStates[idx]?.hashStatus !== 'done' && (
-                  <button className={styles.dtBtnBlue} onClick={() => openHashModal(idx)}>해시 생성</button>
+                  <button className={styles.dtBtnBlue} onClick={() => openHashModal(idx)}>해시 검증</button>
                 )}
               </td>
             </tr>
