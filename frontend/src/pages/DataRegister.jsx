@@ -172,14 +172,20 @@ export default function EvidenceManager() {
                   <input className={styles.inputField} value={formData.사용자} onChange={e => setFormData({ ...formData, 사용자: e.target.value })} />
                 </div>
 
-                <label>종류:
-                  <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}>
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>종류</label>
+                  <select
+                    className={styles.inputField}
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  >
                     <option value="">선택</option>
                     <option value="USB">USB</option>
                     <option value="HDD">HDD</option>
                     <option value="SSD">SSD</option>
                   </select>
-                </label>
+                </div>
+
 
                 <div className={styles.row}>
                   <div className={styles.inputRow}>
@@ -208,11 +214,28 @@ export default function EvidenceManager() {
                   <input className={styles.inputField} value={formData.고유번호} onChange={e => setFormData({ ...formData, 고유번호: e.target.value })} />
                 </div>
 
-                <label>제조일시:</label>
-                <input type="datetime-local" value={formData.제조일시} onChange={e => setFormData({ ...formData, 제조일시: e.target.value })} />
 
-                <label style={{ marginTop: '8px' }}>수집일시:</label>
-                <input type="datetime-local" value={formData.수집일시} onChange={e => setFormData({ ...formData, 수집일시: e.target.value })} />
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>제조일시:</label>
+                  <input
+                    type="datetime-local"
+                    value={formData.제조일시}
+                    onChange={e => setFormData({ ...formData, 제조일시: e.target.value })}
+                    className={styles.inputField}
+                  />
+                </div>
+
+                <div className={styles.inputRow} style={{ marginTop: '10px' }}>
+                  <label className={styles.inputLabel}>수집일시:</label>
+                  <input
+                    type="datetime-local"
+                    value={formData.수집일시}
+                    onChange={e => setFormData({ ...formData, 수집일시: e.target.value })}
+                    className={styles.inputField}
+                  />
+                </div>
+
+
 
                 <div className={styles.formButtons}>
                   <button onClick={() => {
