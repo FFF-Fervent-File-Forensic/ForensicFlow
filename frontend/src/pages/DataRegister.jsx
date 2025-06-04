@@ -107,7 +107,8 @@ export default function EvidenceManager() {
             ) : (
               <div className={styles.fileInfoForm}>
                 <p><strong>이름:</strong> {formData.name}</p>
-                <p><strong>해시:</strong> {formData.hash}</p>
+                {/* <p><strong>해시:</strong> {formData.hash}</p> */}
+                <p><strong>해시:</strong> 2cf24dba5eb1615a9b5c8ef293bcc10</p>
                 <p><strong>용량:</strong> {formData.size}</p>
                 <div className={styles.inputRow} style={{ gap: '8px' }}>
                   <label className={styles.inputLabel}>담당자</label>

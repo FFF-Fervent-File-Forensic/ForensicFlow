@@ -106,3 +106,14 @@
   border-radius: 24px;
   cursor: pointer;
 }
+
+@media print {
+  .reportCard {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .downloadButton {
+    display: none !important;
+  }
+}
