@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styles from '../styles/DataRegister.module.css';
 import { useNavigate } from 'react-router-dom';
 import { useEvidence } from '../contexts/EvidenceContext';
-import HashGeneratorHeader from '../components/HashGeneratorHeader';
+import { calculateHash } from '../components/HashGeneratorHeader';
 
 export default function EvidenceManager() {
   const { evidenceInfo, addEvidence } = useEvidence();
@@ -30,15 +30,17 @@ export default function EvidenceManager() {
   const navigate = useNavigate();
 
   // 파일 선택 시 selectedFile과 formData.name, size만 세팅
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
       const sizeInGB = (file.size / (1024 ** 3)).toFixed(2);
+      const hash = await calculateHash(file);
       setFormData((prev) => ({
         ...prev,
         name: file.name,
         size: `${sizeInGB} GB`,
+        hash,
       }));
     }
   };
@@ -139,10 +141,14 @@ export default function EvidenceManager() {
               <>
                 <p><strong>이름:</strong> {formData.name}</p>
                 <p><strong>용량:</strong> {formData.size}</p>
-
-                {/* 해시 생성 컴포넌트 */}
-                <HashGeneratorHeader onHashCalculated={handleHashCalculated} />
-
+                <div className={styles.inputRow}>
+                  <label className={styles.inputLabel}>해시값</label>
+                  <div style={{
+                    wordBreak: 'break-all'
+                  }}>
+                    {formData.hash || '아직 생성되지 않았습니다.'}
+                  </div>
+                </div>
                 <div className={styles.inputRow} style={{ gap: '8px' }}>
                   <label className={styles.inputLabel}>담당자</label>
                   <input className={styles.inputField} value={formData.담당자} onChange={e => setFormData({ ...formData, 담당자: e.target.value })} />
