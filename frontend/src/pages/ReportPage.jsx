@@ -1,9 +1,10 @@
 import React, { useRef, useEffect, useState } from "react";
 import styles from "../styles/ReportPage.module.css";
 import html2pdf from "html2pdf.js";
+import { useEvidence } from '../contexts/EvidenceContext'; // useEvidence 훅 임포트
 
-const A4_WIDTH = 700;
-const A4_HEIGHT = Math.round(A4_WIDTH * 1.41);
+const A4_WIDTH = 600; // 페이지 너비를 원래대로 (화면상 크기 기준)
+const A4_HEIGHT = Math.round(A4_WIDTH * 1.41); // A4 비율 유지하며 높이 조정 (약 846)
 
 class Evidence {
   constructor(
@@ -49,75 +50,25 @@ class Evidence {
   }
 }
 
-const value_사건번호 = "DF-2025-0413-002"
-const value_접수일자 = "2025/06/05";
-const value_분석일자 = "2025/06/05";
-const value_수집장소 = "충남대학교, 대전광역시 유성구 대학로 99";
-const value_사건개요 = "2025년 5월 30일, 피해자 도민준은 피의자 홍길동으로부터 이메일을 통해 수신한 실행 파일을 열람한 직후, 자신의 컴퓨터에서 비정상적인 동작이 발생하고 계좌에서 총 5,000,000원이 인출되었다는 사실을 인지하였다. 피해자는 즉시 관할 경찰서에 신고하였으며, 이에 따라 피의자의 노트북을 포함한 관련 디지털 증거들이 확보되었다."
-const evidenceList = [
-  new Evidence(
-    "CASE001_USB01_E01.img",
-    "eab35828c6f2e12ff",
-    "32GB",
-    "김수사",
-    "홍길동",
-    "USB",
-    "Samsung",
-    "BAR Plus",
-    "대전교통공사",
-    "디지털포렌식실",
-    "SN123456",
-    "2024-01-01",
-    "2025-05-30",
-    "대전교통공사",
-    "김수사",
-    "디지털 포렌식 도구 1",
-    "USB",
-    "분석 과정 1",
-    "분석 결과 1"
-  ),
-  new Evidence(
-    "CASE001_USB01_E02.img",
-    "eab33631232e12ff",
-    "128GB",
-    "박수사",
-    "홍길순",
-    "HDD",
-    "Samsung",
-    "BAR Plus",
-    "대전교통공사",
-    "디지털포렌식실",
-    "SN234567",
-    "2024-01-03",
-    "2025-05-30",
-    "대전교통공사",
-    "박수사",
-    "디지털 포렌식 도구 2",
-    "HDD",
-    "분석 과정 2",
-    "분석 결과 2"
-  ),
-];
-
-// 페이지 내용을 생성하는 함수 정의
-const renderFirstPage = (styles, value_사건번호, value_접수일자, value_분석일자, value_수집장소, value_사건개요, analysisTargetString) => (
+// 페이지 내용을 생성하는 함수 정의 - Context에서 데이터 받도록 수정
+const renderFirstPage = (styles, caseInfo, analysisTargetString) => (
   <div style={{ marginBottom: 16 }}>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 120, fontWeight: 'bold' }}>사건번호</div>
-      <div>{value_사건번호}</div>
+      <div>{caseInfo?.사건번호}</div> {/* caseInfo에서 데이터 가져옴 */}
     </div>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 120, fontWeight: 'bold' }}>접수일자</div>
-      <div>{value_접수일자}</div>
+      <div>{caseInfo?.접수일자}</div> {/* caseInfo에서 데이터 가져옴 */}
     </div>
     <div style={{ borderTop: '1px solid #222', margin: '16px 0' }}></div>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 120, fontWeight: 'bold' }}>분석일자</div>
-      <div>{value_분석일자}</div>
+      <div>{caseInfo?.분석일자}</div> {/* caseInfo에서 데이터 가져옴 */}
     </div>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 120, fontWeight: 'bold' }}>장소</div>
-      <div>{value_수집장소}</div>
+      <div>{caseInfo?.수집장소}</div> {/* caseInfo에서 데이터 가져옴 */}
     </div>
     <div style={{ borderTop: '1px solid #222', margin: '16px 0' }}></div>
     <div style={{ display: 'flex', marginBottom: 8 }}>
@@ -128,11 +79,11 @@ const renderFirstPage = (styles, value_사건번호, value_접수일자, value_�
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 200, fontWeight: 'bold', fontSize: 20 }}>1. 사건 개요</div>
     </div>
-    <div>{value_사건개요}</div>
+    <div>{caseInfo?.사건개요}</div> {/* caseInfo에서 데이터 가져옴 */}
   </div>
 );
 
-const renderEvidenceTablePage = (evidenceList) => (
+const renderEvidenceTablePage = (evidenceInfo) => (
   <React.Fragment>
     <div style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 16 }}>
       2. 분석 대상 정보
@@ -154,7 +105,8 @@ const renderEvidenceTablePage = (evidenceList) => (
         </tr>
       </thead>
       <tbody>
-        {evidenceList.map((evidence, index) => (
+        {/* evidenceInfo 데이터를 기반으로 각 항목당 2행 구성 */}
+        {evidenceInfo.map((evidence, index) => (
           <React.Fragment key={index}>
             <tr>
               <td rowSpan="2" style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{index + 1}</td>
@@ -185,7 +137,8 @@ const renderEvidenceTablePage = (evidenceList) => (
         <div style={{ marginBottom: 8 }}>
           II. 복구&분석에 사용한 프로그램 : 
           {
-            Array.from(new Set(evidenceList.map(evidence => evidence.analysisTool)))
+            // evidenceInfo에서 analysisTool 값을 모아서 중복 제거 후 표시
+            Array.from(new Set(evidenceInfo.map(evidence => evidence.analysisTool)))
                  .join(', ')
           }
         </div>
@@ -251,14 +204,25 @@ const renderFinalSummaryPage = () => (
 
 export default function DigitalReportFilled() {
   const reportRef = useRef(); // 전체 보고서를 감싸는 ref
+  const downloadButtonRef = useRef(null); // 다운로드 버튼을 위한 ref
   const [pagesContent, setPagesContent] = useState([]);
 
+  // Context에서 데이터 가져오기
+  const { caseInfo, evidenceInfo } = useEvidence();
+
   useEffect(() => {
+    // caseInfo와 evidenceInfo가 로드되었는지 확인
+    if (!caseInfo || evidenceInfo.length === 0) {
+      // 데이터가 없을 경우 페이지를 생성하지 않거나 로딩 상태를 표시할 수 있습니다.
+      setPagesContent([]); // 또는 로딩 상태 등으로 처리
+      return;
+    }
+
     const allPages = [];
 
     // 증거 종류별 개수 집계
     const counts = {};
-    evidenceList.forEach(evidence => {
+    evidenceInfo.forEach(evidence => {
       const type = evidence.type;
       counts[type] = (counts[type] || 0) + 1;
     });
@@ -272,14 +236,14 @@ export default function DigitalReportFilled() {
     }
     const analysisTargetString = "컴퓨터에 부속 장착된 " + analysisTargetParts.join(', ');
 
-    // 첫 번째 페이지 내용 추가 - 동적으로 생성된 문자열 전달
-    allPages.push(renderFirstPage(styles, value_사건번호, value_접수일자, value_분석일자, value_수집장소, value_사건개요, analysisTargetString));
+    // 첫 번째 페이지 내용 추가 - Context 데이터와 동적으로 생성된 문자열 전달
+    allPages.push(renderFirstPage(styles, caseInfo, analysisTargetString));
 
-    // 두 번째 페이지 내용 추가 (증거 목록 테이블 등)
-    allPages.push(renderEvidenceTablePage(evidenceList));
+    // 두 번째 페이지 내용 추가 (증거 목록 테이블 등) - Context 데이터 전달
+    allPages.push(renderEvidenceTablePage(evidenceInfo));
 
-    // 각 증거에 대한 상세 페이지 추가
-    evidenceList.forEach(evidence => {
+    // 각 증거에 대한 상세 페이지 추가 - Context 데이터 순회
+    evidenceInfo.forEach(evidence => {
       allPages.push(renderEvidenceDetailPage(evidence));
     });
 
@@ -288,7 +252,7 @@ export default function DigitalReportFilled() {
 
     setPagesContent(allPages);
 
-  }, [value_사건번호, value_접수일자, value_분석일자, value_수집장소, value_사건개요, evidenceList]);
+  }, [caseInfo, evidenceInfo]); // 의존성 배열에 caseInfo와 evidenceInfo 추가
 
   const handleDownloadPDF = () => {
     const element = reportRef.current; // 전체 컨테이너를 대상으로 PDF 생성
@@ -324,8 +288,6 @@ export default function DigitalReportFilled() {
   const totalPages = pagesContent.length;
   const today = new Date();
   const formattedDate = `${today.getFullYear()}. ${today.getMonth() + 1}. ${today.getDate()}.`;
-
-  const downloadButtonRef = useRef(null); // 다운로드 버튼을 위한 ref 생성
 
   return (
     <div className={styles.reportWrapper} ref={reportRef}> {/* 전체 페이지 컨테이너 */}
@@ -370,7 +332,7 @@ export default function DigitalReportFilled() {
           <div style={{ marginTop: "auto", fontSize: 12, borderTop: "1px solid #eee", paddingTop: 12, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
             {/* 푸터 왼쪽 내용: 모든 페이지 수집장소 */}
             <div>
-              <div>{value_수집장소}</div>
+              <div>{caseInfo?.수집장소}</div> {/* caseInfo에서 데이터 가져옴 */}
             </div>
             {/* 푸터 오른쪽 내용: 페이지 번호 */}
             <div>{index + 1} / {totalPages} 페이지</div>

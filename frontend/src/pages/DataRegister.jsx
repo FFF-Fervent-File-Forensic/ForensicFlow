@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEvidence } from '../contexts/EvidenceContext';
 
 export default function EvidenceManager() {
-  const { evidenceList, setEvidenceList } = useEvidence();
+  const { evidenceInfo, addEvidence } = useEvidence();
 
   const [isUploadUIVisible, setIsUploadUIVisible] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -49,14 +49,26 @@ export default function EvidenceManager() {
     if (formData?.name && formData?.type && formData?.수집일시) {
       const dateObj = new Date(formData.수집일시);
       const formattedDate = `${dateObj.getFullYear()}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
-      setEvidenceList([
-        ...evidenceList,
-        {
-          name: formData.name,
-          type: formData.type,
-          date: formattedDate
-        }
-      ]);
+
+      const evidenceItem = {
+        name: formData.name,
+        type: formData.type,
+        date: formattedDate,
+        hash: formData.hash,
+        size: formData.size,
+        담당자: formData.담당자,
+        사용자: formData.사용자,
+        증거종류: formData.증거종류,
+        제조사: formData.제조사,
+        모델명: formData.모델명,
+        수집장소: formData.수집장소,
+        제조일시: formData.제조일시,
+        보관장소: formData.보관장소,
+        고유번호: formData.고유번호,
+        서명파일: signatureFile,
+      };
+
+      addEvidence(evidenceItem);
       setSelectedFile(null);
       setFormData(initialFormData);
       setIsUploadUIVisible(false);
@@ -81,7 +93,7 @@ export default function EvidenceManager() {
             </tr>
           </thead>
           <tbody>
-            {evidenceList.map((item, idx) => (
+            {(evidenceInfo || []).map((item, idx) => (
               <tr key={idx}>
                 <td>{item.name}</td>
                 <td>{item.type}</td>
@@ -113,22 +125,15 @@ export default function EvidenceManager() {
                 <div className={styles.inputRow} style={{ gap: '8px' }}>
                   <label className={styles.inputLabel}>담당자</label>
                   <input className={styles.inputField} value={formData.담당자} onChange={e => setFormData({ ...formData, 담당자: e.target.value })} />
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('signatureInput').click()}
-                    style={{ padding: '6px 20px', borderRadius: '6px', border: '1px solid #ccc', background: '#f5f5f5', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}
-                  >서명</button>
-                  <input
-                    id="signatureInput"
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={e => {
-                      if (e.target.files && e.target.files[0]) {
-                        setSignatureFile(e.target.files[0]);
-                      }
-                    }}
-                  />
+                  <button type="button" onClick={() => document.getElementById('signatureInput').click()}
+                    style={{ padding: '6px 20px', borderRadius: '6px', border: '1px solid #ccc', background: '#f5f5f5', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+                    서명
+                  </button>
+                  <input id="signatureInput" type="file" accept="image/*" style={{ display: 'none' }} onChange={e => {
+                    if (e.target.files && e.target.files[0]) {
+                      setSignatureFile(e.target.files[0]);
+                    }
+                  }} />
                 </div>
                 {signatureFile && (
                   <div style={{ fontSize: '13px', color: '#007bff', marginBottom: '4px' }}>
@@ -139,8 +144,7 @@ export default function EvidenceManager() {
                   <label className={styles.inputLabel}>사용자</label>
                   <input className={styles.inputField} value={formData.사용자} onChange={e => setFormData({ ...formData, 사용자: e.target.value })} />
                 </div>
-                <label>
-                  종류:
+                <label>종류:
                   <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })}>
                     <option value="">선택</option>
                     <option value="USB">USB</option>
@@ -172,14 +176,10 @@ export default function EvidenceManager() {
                   <label className={styles.inputLabel}>고유번호</label>
                   <input className={styles.inputField} value={formData.고유번호} onChange={e => setFormData({ ...formData, 고유번호: e.target.value })} />
                 </div>
-                <label style={{ marginTop: '8px', marginBottom: '2px' }}>제조일시:</label>
-                <div className={styles.inputRow}>
+                <label>제조일시:</label>
                 <input type="datetime-local" value={formData.제조일시} onChange={e => setFormData({ ...formData, 제조일시: e.target.value })} />
-                </div>
-                <label style={{ marginTop: '8px', marginBottom: '2px' }}>수집일시:</label>
-                <div className={styles.inputRow}>
+                <label style={{ marginTop: '8px' }}>수집일시:</label>
                 <input type="datetime-local" value={formData.수집일시} onChange={e => setFormData({ ...formData, 수집일시: e.target.value })} />
-                </div>
                 <div className={styles.formButtons}>
                   <button onClick={() => {
                     setIsUploadUIVisible(false);
