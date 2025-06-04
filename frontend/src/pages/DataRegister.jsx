@@ -29,7 +29,9 @@ export default function EvidenceManager() {
 
   const navigate = useNavigate();
 
-  // 파일 선택 시 selectedFile과 formData.name, size만 세팅
+  const requiredFields = ['담당자', '사용자', 'type', '제조사', '모델명', '수집장소', '보관장소', '고유번호', '제조일시', '수집일시'];
+  const isFormValid = requiredFields.every((key) => formData[key] && formData[key] !== '') && !!signatureFile && !!formData.hash;
+
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -45,7 +47,6 @@ export default function EvidenceManager() {
     }
   };
 
-  // HashGeneratorHeader에서 해시 계산 후 전달받는 콜백
   const handleHashCalculated = (hash) => {
     setFormData((prev) => ({
       ...prev,
@@ -54,8 +55,6 @@ export default function EvidenceManager() {
   };
 
   const handleRegisterClick = () => {
-    const requiredFields = ['담당자', '사용자', 'type', '제조사', '모델명', '수집장소', '보관장소', '고유번호', '제조일시', '수집일시'];
-    const isFormValid = requiredFields.every((key) => formData[key] && formData[key] !== '') && !!signatureFile && !!formData.hash;
     if (!isFormValid) {
       alert('필수 항목을 모두 입력하고 서명 및 파일 업로드를 완료해주세요.');
       return;
@@ -269,8 +268,8 @@ export default function EvidenceManager() {
                     onClick={handleRegisterClick}
                     disabled={!formData.hash}
                     style={{
-                      backgroundColor: formData.hash ? '#007bff' : '#ccc',
-                      color: formData.hash ? '#fff' : '#888'
+                      backgroundColor: isFormValid ? '#007bff' : '#ccc',
+                      color: isFormValid ? '#fff' : '#888'
                     }}
                   >등록</button>
                 </div>
