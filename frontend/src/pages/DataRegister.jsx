@@ -191,7 +191,6 @@ export default function EvidenceManager() {
                   </select>
                 </div>
 
-
                 <div className={styles.row}>
                   <div className={styles.inputRow}>
                     <label className={styles.inputLabel}>제조사</label>
