@@ -130,3 +130,53 @@
     color: #888;
     font-size: 14px;
   }
+
+  .hashModalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 2100;
+}
+
+.hashModalBackdrop {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.7);
+  z-index: 2101;
+}
+
+.hashModalContent {
+  background-color: #fff;
+  border: 1px solid #aeaeae;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.08);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  min-width: 400px;
+  width: 440px;
+  padding: 32px 36px;
+  z-index: 2102;
+  align-items: flex-start;
+}
+
+.uploadTitle {
+  color: #0066ff;
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-size: 18px;
+  text-align: left;
+  width: 100%;
+}
+
+.formButtonsHashModal {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}

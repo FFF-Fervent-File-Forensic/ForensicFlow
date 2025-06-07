@@ -1,5 +1,3 @@
-/* DataRegister.module.css */
-
 .body {
   margin: 0;
   font-family: 'Helvetica Neue', sans-serif;
@@ -15,7 +13,7 @@
 }
 
 .leftPane {
-  width: 66%;
+  width: 60%;
   border-right: 1px solid #ccc;
   padding-right: 20px;
   overflow-y: auto;
@@ -23,7 +21,8 @@
 }
 
 .rightPane {
-  width: 33%;
+  width: 40%;
+  min-width: 400px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -55,96 +54,51 @@
 }
 
 .uploadBox {
+  width: 100%;
+  max-width: 600px;
   background-color: #fff;
   border: 1px solid #aeaeae;
   border-radius: 12px;
-  padding: 20px;
-  width: 80%;
+  padding: 20px 24px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
 
-.uploadTitle {
-  color: #0066ff;
-  font-weight: bold;
-  margin-bottom: 20px;
-  font-size: 16px;
-}
-
-.fileDrop {
-  height: 120px;
-  border: 2px dashed #ccc;
-  border-radius: 12px;
-  background-color: #e3e3e3;
-  text-align: center;
-  line-height: 120px;
-  color: #666;
-  cursor: pointer;
-  transition: border-color 0.3s;
-}
-
-.fileDrop:hover {
-  border-color: #0066ff;
-}
-
-.fileInfoForm {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.fileInfoForm p {
-  margin: 8px 0 0 0;
-  font-size: 15px;
-}
-
-.fileInfoForm input {
-  width: 100%;
-  padding: 8px 10px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  border: none;
-  border-bottom: 2px solid #ffffff;
-  border-top: 2px solid #fff;
-  border-left: 2px solid #fff;
-  border-right: 2px solid #fff;
-  font-size: 15px;
-  box-sizing: border-box;
-  background: #fff;
-}
-
-.fileInfoForm select {
-  width: 100%;
-  padding: 8px 10px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  border: none;
-  border-bottom: 2px solid #858585;
-  border-top: 2px solid #fff;
-  border-left: 2px solid #fff;
-  border-right: 2px solid #fff;
-  font-size: 15px;
-  box-sizing: border-box;
-  background: #fff;
-}
-
-.fileInfoForm label {
+.inputRow {
   display: flex;
   align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: nowrap;
+}
+
+.inputLabel {
+  flex: 0 0 80px;
   font-size: 14px;
-  margin-bottom: 0;
-  margin-top: 0;
-  gap: 8px;
+  color: #444;
   white-space: nowrap;
 }
 
-.row {
-  display: flex;
-  gap: 10px;
+.inputField {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.row > * {
+.formRow {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.formRow > div {
   flex: 1;
+}
+
+select.inputField {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .formButtons {
@@ -159,25 +113,21 @@
   border-radius: 8px;
   border: none;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .formButtons button:first-child {
   background-color: #fff;
   color: #222;
   border: 1px solid #ccc;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
 }
 
 .formButtons button:last-child {
   background-color: #0066ff;
   color: white;
   border: none;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-}
-
-.formButtons button:last-child:not(:disabled):hover {
-  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 
 .formButtons button:disabled {
@@ -206,31 +156,35 @@
 
 .bottomButton button:hover {
   background-color: #0066ff;
+  color: #fff;
 }
 
-.inputRow {
-  display: flex;
-  align-items: center;
-  border-bottom: 2px solid #858585;
-  width: 100%;
+.signatureAttachButton {
+  padding: 6px 20px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
-.inputLabel {
-  min-width: 70px;
-  color: #858585;
-  font-size: 15px;
-  margin-right: 10px;
+.hiddenInput {
+  display: none;
 }
 
-.inputField {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 15px;
-  padding: 8px 0;
-  color: #222;
-  border-bottom: 2px solid #858585;
-  margin-bottom: 18px;
-  box-sizing: border-box;
+.fileDrop {
+  height: 120px;
+  border: 2px dashed #ccc; /* 점선 경계 */
+  border-radius: 12px;
+  background-color: #e3e3e3; /* 연한 회색 배경 */
+  text-align: center;
+  line-height: 120px;
+  color: #666;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.fileDrop:hover {
+  border-color: #0066ff;
 }

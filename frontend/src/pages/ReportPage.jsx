@@ -6,6 +6,12 @@ import { useEvidence } from '../contexts/EvidenceContext'; // useEvidence 훅 �
 const A4_WIDTH = 600; // 페이지 너비를 원래대로 (화면상 크기 기준)
 const A4_HEIGHT = Math.round(A4_WIDTH * 1.41); // A4 비율 유지하며 높이 조정 (약 846)
 
+// 전역 변수로 데이터 선언
+let globalCaseInfo = null;
+let globalEvidenceInfo = [];
+let globalTransferInfo = {};
+let globalAnalysisInfo = {};
+
 class Evidence {
   constructor(
     name,
@@ -50,40 +56,40 @@ class Evidence {
   }
 }
 
-// 페이지 내용을 생성하는 함수 정의 - Context에서 데이터 받도록 수정
-const renderFirstPage = (styles, caseInfo, analysisTargetString) => (
+// 페이지 내용을 생성하는 함수 정의 - 전역 변수 사용
+const renderFirstPage = (styles) => (
   <div style={{ marginBottom: 16 }}>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 120, fontWeight: 'bold' }}>사건번호</div>
-      <div>{caseInfo?.사건번호}</div> {/* caseInfo에서 데이터 가져옴 */}
+      <div>{globalCaseInfo?.caseNumber}</div>
     </div>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 120, fontWeight: 'bold' }}>접수일자</div>
-      <div>{caseInfo?.접수일자}</div> {/* caseInfo에서 데이터 가져옴 */}
+      <div>{globalCaseInfo?.incidentDateTime}</div>
     </div>
     <div style={{ borderTop: '1px solid #222', margin: '16px 0' }}></div>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 120, fontWeight: 'bold' }}>분석일자</div>
-      <div>{caseInfo?.분석일자}</div> {/* caseInfo에서 데이터 가져옴 */}
+      <div>{globalTransferInfo[globalEvidenceInfo[0]?.name]?.도착일시}</div>
     </div>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 120, fontWeight: 'bold' }}>장소</div>
-      <div>{caseInfo?.수집장소}</div> {/* caseInfo에서 데이터 가져옴 */}
+      <div>{globalTransferInfo[globalEvidenceInfo[0]?.name]?.도착위치}</div>
     </div>
     <div style={{ borderTop: '1px solid #222', margin: '16px 0' }}></div>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 120, fontWeight: 'bold' }}>분석대상</div>
-      <div>{analysisTargetString}</div>
+      <div>{globalCaseInfo?.analysisTargetString}</div>
     </div>
     <div style={{ borderTop: '1px solid #111', margin: '16px 0' }}></div>
     <div style={{ display: 'flex', marginBottom: 8 }}>
       <div style={{ width: 200, fontWeight: 'bold', fontSize: 20 }}>1. 사건 개요</div>
     </div>
-    <div>{caseInfo?.사건개요}</div> {/* caseInfo에서 데이터 가져옴 */}
+    <div>{globalCaseInfo?.summary}</div>
   </div>
 );
 
-const renderEvidenceTablePage = (evidenceInfo) => (
+const renderEvidenceTablePage = () => (
   <React.Fragment>
     <div style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 16 }}>
       2. 분석 대상 정보
@@ -91,7 +97,7 @@ const renderEvidenceTablePage = (evidenceInfo) => (
     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
       <thead>
         <tr style={{ backgroundColor: '#eee' }}>
-          <th rowSpan="2" style={{ border: '1px solid #222', padding: '8px', textAlign: 'center' }}>증거<br/>번호</th>
+          <th rowSpan="2" style={{ border: '1px solid #222', padding: '8px', textAlign: 'center', fontSize: '13px'}}>증거<br/>번호</th>
           <th colSpan="3" style={{ border: '1px solid #222', padding: '8px', textAlign: 'center' }}>고유(Serial) 번호</th>
           <th style={{ border: '1px solid #222', padding: '8px', textAlign: 'center' }}>모델명</th>
           <th style={{ border: '1px solid #222', padding: '8px', textAlign: 'center' }}>용량</th>
@@ -105,27 +111,25 @@ const renderEvidenceTablePage = (evidenceInfo) => (
         </tr>
       </thead>
       <tbody>
-        {/* evidenceInfo 데이터를 기반으로 각 항목당 2행 구성 */}
-        {evidenceInfo.map((evidence, index) => (
+        {globalEvidenceInfo.map((evidence, index) => (
           <React.Fragment key={index}>
             <tr>
               <td rowSpan="2" style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{index + 1}</td>
-              <td colSpan="3" style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.serialNumber}</td>
-              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.model}</td>
+              <td colSpan="3" style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.고유번호}</td>
+              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.모델명}</td>
               <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.size}</td>
             </tr>
             <tr>
-              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.user}</td>
+              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.사용자}</td>
               <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.type}</td>
-              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.manufacturer}</td>
-              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.manufacturingDate}</td>
-              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>-</td> {/* 임시 */}
+              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.제조사}</td>
+              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>{evidence.제조일시}</td>
+              <td style={{ border: '1px solid #222', padding: '8px', fontSize: '12px', textAlign: 'center' }}>-</td>
             </tr>
           </React.Fragment>
         ))}
       </tbody>
     </table>
-    {/* 3. 분석 시스템과 도구 섹션 */}
     <div style={{ marginTop: '32px' }}>
       <div style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 12 }}>
         3. 분석 시스템과 도구
@@ -137,17 +141,10 @@ const renderEvidenceTablePage = (evidenceInfo) => (
         <div style={{ marginBottom: 8 }}>
           II. 복구&분석에 사용한 프로그램 : 
           {
-            // evidenceInfo에서 analysisTool 값을 모아서 중복 제거 후 표시
-            Array.from(new Set(evidenceInfo.map(evidence => evidence.analysisTool)))
+            Array.from(new Set(globalEvidenceInfo.map(evidence => globalAnalysisInfo[evidence.name]?.tool)))
                  .join(', ')
           }
         </div>
-      </div>
-    </div>
-
-    <div style={{ marginTop: '32px' }}>
-      <div style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 12 }}>
-        4. 증거 상세 분석
       </div>
     </div>
   </React.Fragment>
@@ -155,33 +152,29 @@ const renderEvidenceTablePage = (evidenceInfo) => (
 
 const renderEvidenceDetailPage = (evidence) => (
   <React.Fragment>
-    {/* 분석 대상 - 이름 */}
     <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px' }}>
       분석 대상 - {evidence.name}
     </div>
-    {/* 상세 정보 */}
     <div style={{ borderTop: '1px solid #111', margin: '16px 0' }}></div>
     <div style={{ marginBottom: '16px' }}>
       <div style={{ marginBottom: '8px' }}>크기 : {evidence.size}</div>
       <div style={{ marginBottom: '8px' }}>해시값 : {evidence.hash}</div>
       <div style={{ marginBottom: '8px' }}>해시함수 : SHA-256</div>
-      <div style={{ marginBottom: '8px' }}>사용 도구 : {evidence.analysisTool}</div>
+      <div style={{ marginBottom: '8px' }}>사용 도구 : {globalAnalysisInfo[evidence.name]?.tool}</div>
     </div>
     <div style={{ borderTop: '1px solid #111', margin: '16px 0' }}></div>
-    {/* 수행한 분석 방법 */}
     <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
       수행한 분석 방법 -
     </div>
     <div style={{ marginBottom: '16px' }}>
-      {evidence.analysisProcess}
+      {globalAnalysisInfo[evidence.name]?.procedure}
     </div>
     <div style={{ borderTop: '1px solid #111', margin: '16px 0' }}></div>
-    {/* 분석 결과 */}
     <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>
       분석 결과 -
     </div>
     <div>
-      {evidence.analysisResult}
+      {globalAnalysisInfo[evidence.name]?.result}
     </div>
   </React.Fragment>
 );
@@ -208,13 +201,61 @@ export default function DigitalReportFilled() {
   const [pagesContent, setPagesContent] = useState([]);
 
   // Context에서 데이터 가져오기
-  const { caseInfo, evidenceInfo } = useEvidence();
+  const { caseInfo, evidenceInfo, transferInfo, analysisInfo } = useEvidence();
 
   useEffect(() => {
+    // 전역 변수에 데이터 할당
+    globalCaseInfo = caseInfo;
+    globalEvidenceInfo = evidenceInfo;
+    globalTransferInfo = transferInfo;
+    globalAnalysisInfo = analysisInfo;  // analysisInfo도 전역 변수에 할당
+
+    // 데이터 로드 확인을 위한 콘솔 로그
+    console.log('Transfer Info:', globalTransferInfo);
+    console.log('First Evidence Name:', globalEvidenceInfo[0]?.name);
+    console.log('First Transfer Data:', globalTransferInfo[globalEvidenceInfo[0]?.name]);
+    console.log('Analysis Info:', globalAnalysisInfo);  // analysisInfo 로그 추가
+
     // caseInfo와 evidenceInfo가 로드되었는지 확인
-    if (!caseInfo || evidenceInfo.length === 0) {
-      // 데이터가 없을 경우 페이지를 생성하지 않거나 로딩 상태를 표시할 수 있습니다.
-      setPagesContent([]); // 또는 로딩 상태 등으로 처리
+    if (!globalCaseInfo || globalEvidenceInfo.length === 0) {
+      // 데이터가 없을 경우 '데이터가 없습니다.' 페이지 생성
+      setPagesContent([
+        <div
+          key="no-data"
+          className={styles.reportCard}
+          style={{
+            width: A4_WIDTH,
+            minHeight: A4_HEIGHT, // 최소 높이로 설정
+            margin: "0 auto 32px auto",
+            border: "1px solid #ccc",
+            padding: 48,
+            background: "#fff",
+            boxSizing: "border-box",
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {/* 페이지 제목 (생략하거나 필요에 따라 표시) */}
+          {/* <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 30, marginBottom: 24 }}>
+              디지털 포렌식 보고서
+          </div> */}
+
+          {/* 페이지 내용 - 데이터 없음 메시지 */}
+          <div style={{flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '18px', fontWeight: 'bold'}}> {/* 내용 중앙 정렬 */}
+            데이터가 없습니다.
+          </div>
+
+          {/* 하단 정보 - 페이지 번호는 1/1로 표시 */}
+          <div style={{ marginTop: "auto", fontSize: 12, borderTop: "1px solid #eee", paddingTop: 12, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
+            {/* 푸터 왼쪽 내용: 수집장소 */}
+            <div>
+              <div>{globalCaseInfo?.수집장소 || '정보 없음'}</div> {/* caseInfo가 없을 수도 있으므로 대체 텍스트 */}
+            </div>
+            {/* 푸터 오른쪽 내용: 페이지 번호 */}
+            <div>1 / 1 페이지</div>
+          </div>
+        </div>
+      ]);
       return;
     }
 
@@ -222,7 +263,7 @@ export default function DigitalReportFilled() {
 
     // 증거 종류별 개수 집계
     const counts = {};
-    evidenceInfo.forEach(evidence => {
+    globalEvidenceInfo.forEach(evidence => {
       const type = evidence.type;
       counts[type] = (counts[type] || 0) + 1;
     });
@@ -235,15 +276,16 @@ export default function DigitalReportFilled() {
       }
     }
     const analysisTargetString = "컴퓨터에 부속 장착된 " + analysisTargetParts.join(', ');
+    globalCaseInfo.analysisTargetString = analysisTargetString;
 
-    // 첫 번째 페이지 내용 추가 - Context 데이터와 동적으로 생성된 문자열 전달
-    allPages.push(renderFirstPage(styles, caseInfo, analysisTargetString));
+    // 첫 번째 페이지 내용 추가
+    allPages.push(renderFirstPage(styles));
 
-    // 두 번째 페이지 내용 추가 (증거 목록 테이블 등) - Context 데이터 전달
-    allPages.push(renderEvidenceTablePage(evidenceInfo));
+    // 두 번째 페이지 내용 추가
+    allPages.push(renderEvidenceTablePage());
 
-    // 각 증거에 대한 상세 페이지 추가 - Context 데이터 순회
-    evidenceInfo.forEach(evidence => {
+    // 각 증거에 대한 상세 페이지 추가
+    globalEvidenceInfo.forEach(evidence => {
       allPages.push(renderEvidenceDetailPage(evidence));
     });
 
@@ -252,7 +294,7 @@ export default function DigitalReportFilled() {
 
     setPagesContent(allPages);
 
-  }, [caseInfo, evidenceInfo]); // 의존성 배열에 caseInfo와 evidenceInfo 추가
+  }, [caseInfo, evidenceInfo, transferInfo, analysisInfo]); // 의존성 배열에 caseInfo와 evidenceInfo와 transferInfo와 analysisInfo 추가
 
   const handleDownloadPDF = () => {
     const element = reportRef.current; // 전체 컨테이너를 대상으로 PDF 생성
@@ -324,7 +366,7 @@ export default function DigitalReportFilled() {
             <div style={{ textAlign: 'center', fontSize: 23, marginTop: '24px', marginBottom: '120px', fontWeight: 'bold' }}> {/* 푸터와의 간격 조정 */}
               <div>{formattedDate}</div>
               <div>충남대학교 디지털포렌식팀</div>
-              <div>디지털포렌식 수사관 ○○○</div>
+              <div>디지털포렌식 수사관 {globalEvidenceInfo[0]?.담당자}</div>
             </div>
           )}
 
@@ -332,7 +374,7 @@ export default function DigitalReportFilled() {
           <div style={{ marginTop: "auto", fontSize: 12, borderTop: "1px solid #eee", paddingTop: 12, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
             {/* 푸터 왼쪽 내용: 모든 페이지 수집장소 */}
             <div>
-              <div>{caseInfo?.수집장소}</div> {/* caseInfo에서 데이터 가져옴 */}
+              <div>{globalCaseInfo?.수집장소}</div> {/* caseInfo에서 데이터 가져옴 */}
             </div>
             {/* 푸터 오른쪽 내용: 페이지 번호 */}
             <div>{index + 1} / {totalPages} 페이지</div>
