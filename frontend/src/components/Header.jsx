@@ -8,7 +8,7 @@ export default function Header() {
 
   const navLinks = [
     { name: '홈', path: '/main' }, // Main.jsx
-    { name: '사건 등록', path: ' ' }, // 사전 정보 확인 페이지 별도 추가 필요.
+    { name: '사건 등록', path: '/caseinfo' }, // 사전 정보 확인 페이지 별도 추가 필요.
     { name: '증거 등록', path: '/register' }, // DataRegister.jsx
     { name: '증거 이송 및 보관', path: '/transfer' }, // DataTransfer.jsx
     { name: '증거 분석', path: '/analyze' }, // Analyze.jsx
