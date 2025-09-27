@@ -4,6 +4,7 @@ import styles from '../styles/Header.module.css';
 
 export default function Header() {
   const location = useLocation();
+  const isMaster = true; //임의 master 지정.
 
   const navLinks = [
     { name: '홈', path: '/main' }, // Main.jsx
@@ -17,15 +18,25 @@ export default function Header() {
   return (
     <header className={styles.header}>
       <nav className={styles.nav}>
-        {navLinks.map((link) => (
-          <Link
-            key={link.name}
-            to={link.path}
-            className={`${styles.navLink} ${location.pathname.startsWith(link.path) ? styles.disabled : ''}`}
-          >
-            {link.name}
+        <div className={styles.navLinks}>
+          {navLinks.map((link) => (
+            <Link
+              key={link.name}
+              to={link.path}
+              className={`${styles.navLink} ${
+                location.pathname.startsWith(link.path) ? styles.disabled : ''
+              }`}
+            >
+              {link.name}
+            </Link>
+          ))}
+        </div>
+
+        {isMaster && (
+          <Link to="/admin" className={styles.adminButton} title="관리자 페이지">
+            ⚙️
           </Link>
-        ))}
+        )}
       </nav>
     </header>
   );
