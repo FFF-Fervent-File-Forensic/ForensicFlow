@@ -148,6 +148,9 @@ function Main() {
         <button className={styles.registerButton} onClick={() => setShowModal(true)}>
           ⊕ 사건 등록
         </button>
+        <button className={styles.logoutButton} onClick={() => navigate("/")}>
+          로그아웃
+        </button>
       </div>
       
       <div className={styles.caseList}>
