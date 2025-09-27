@@ -27,7 +27,7 @@
     font-size: 14px;
     background-color: white;
     appearance: none;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007aff%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-24.8%200L146.2%20185.6%2030.3%2069.4a17.6%2017.6%200%200%200-24.8%2024.8l130.4%20130.5c6.8%206.8%2017.8%206.8%2024.6%200l130.4-130.5a17.6%2017.6%200%200%200%200-24.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M0 0l5 6 5-6' fill='%23007aff'/></svg>");
     background-repeat: no-repeat;
     background-position: right 10px top 50%;
     background-size: 12px;
