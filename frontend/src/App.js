@@ -8,10 +8,10 @@ import Analyzeinput from "./pages/AnalysisInputForm";
 import ReportPage from "./pages/ReportPage";
 import DataRegister from "./pages/DataRegister";
 import DataTransfer from "./pages/DataTransfer";
+import CaseAdmin from "./pages/CaseAdmin";
 import { EvidenceProvider } from "./contexts/EvidenceContext";
 import Header from "./components/Header";
 
-// 헤더가 필요한 페이지들을 위한 레이아웃 컴포넌트
 function Layout() {
   return (
     <div>
@@ -36,6 +36,7 @@ function App() {
             <Route path="/reportPage" element={<ReportPage />} />
             <Route path="/register" element={<DataRegister />} />
             <Route path="/transfer" element={<DataTransfer />} />
+            <Route path="/admin" element={<CaseAdmin />} />
           </Route>
         </Routes>
       </BrowserRouter>
