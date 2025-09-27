@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import styles from '../styles/Main.module.css';
 import { useNavigate } from 'react-router-dom';
 import { useEvidence } from '../contexts/EvidenceContext';
@@ -8,6 +8,9 @@ function Main() {
   const [showModal, setShowModal] = useState(false);
   const [showLegalUploadModal, setShowLegalUploadModal] = useState(false);
   const [legalFile, setLegalFile] = useState(null);
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStage, setFilterStage] = useState('전체');
 
   const navigate = useNavigate();
   const { addCaseInfo } = useEvidence();
@@ -30,6 +33,15 @@ function Main() {
     { stage: '증거 분석 중', percent: 66 },
     { stage: '분석 완료', percent: 100 },
   ];
+
+  const filteredCaseList = useMemo(() => {
+    return caseList.filter(c => {
+      const matchesSearch = c.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStage = filterStage === '전체' || c.progress === filterStage;
+
+      return matchesSearch && matchesStage;
+    });
+  }, [caseList, searchTerm, filterStage]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -84,36 +96,76 @@ function Main() {
     setFormData({ ...formData, legalPower: false });
   };
 
-  useEffect(() => {
+  // 필터링 기능 테스트 더미데이터 추가
+    useEffect(() => {
     setCaseList(prev => {
-      if (prev.some(c => c.id === 'DF-2025-0413-001')) return prev;
-      return [
-        ...prev,
-        {
+      let initialList = [...prev];
+      if (!initialList.some(c => c.id === 'DF-2025-0413-001')) {
+        initialList.push({
           id: 'DF-2025-0413-001',
           progress: '증거 수집 중',
           progressPercent: 10,
-        },
-      ];
+        });
+      }
+      if (!initialList.some(c => c.id === 'AB-2025-0501-002')) {
+        initialList.push({
+            id: 'AB-2025-0501-002',
+            progress: '분석 완료',
+            progressPercent: 100,
+        });
+      }
+      if (!initialList.some(c => c.id === 'XY-2025-0610-003')) {
+        initialList.push({
+            id: 'XY-2025-0610-003',
+            progress: '증거 이송 중',
+            progressPercent: 45,
+        });
+      }
+      return initialList;
     });
   }, []);
 
   return (
     <div className={styles.mainContainer}>
-      <div className={styles.header}>
+      <div className={styles.searchBarContainer}>
+        <input
+          type="text"
+          placeholder="🔍 사건 번호로 검색"
+          className={styles.caseSearchInput}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          className={styles.stageFilterSelect}
+          value={filterStage}
+          onChange={(e) => setFilterStage(e.target.value)}
+        >
+          <option value="전체">전체 단계</option>
+          {progressStages.map(p => (
+            <option key={p.stage} value={p.stage}>{p.stage}</option>
+          ))}
+        </select>  
         <button className={styles.registerButton} onClick={() => setShowModal(true)}>
           ⊕ 사건 등록
         </button>
       </div>
-
+      
       <div className={styles.caseList}>
-        {caseList.length === 0 ? (
+        {filteredCaseList.length === 0 ? (
           <div className={styles.emptyMessage}>
-            등록된 사건 폴더가 없습니다.<br />
-            ‘사건 등록’ 버튼을 눌러 폴더를 생성해주세요
+            {searchTerm || filterStage !== '전체'
+              ? '검색 조건에 맞는 사건이 없습니다.'
+              : (
+                <>
+                  등록된 사건 폴더가 없습니다.
+                  <br />
+                  ‘사건 등록’ 버튼을 눌러 폴더를 생성해주세요
+                </>
+              )
+            }
           </div>
         ) : (
-          caseList.map((c) => (
+          filteredCaseList.map((c) => (
             <div
               className={styles.caseCard}
               key={c.id}
