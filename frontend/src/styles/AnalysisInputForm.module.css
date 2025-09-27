@@ -1,5 +1,4 @@
 /* AnalysisInputForm.module.css */
-
 .inputFormContainer { /* input-form-container */
     max-width: 900px;
     margin: 30px auto;
@@ -7,73 +6,85 @@
     background: white;
     border: 1px solid #ccc;
     border-radius: 8px;
-  }
- 
-  .inputGrid { /* input-grid */
+}
+
+.inputGrid { /* input-grid */
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px 40px;
     margin-bottom: 40px;
-  }
- 
-  .labelGroup { /* label-group */
+}
+
+.labelGroup { /* label-group */
     display: flex;
     flex-direction: column;
     font-size: 14px;
-  }
- 
-  .labelGroup label {
+}
+
+.labelGroup label {
     margin-bottom: 6px;
     font-weight: 500;
     color: #333;
-  }
- 
-  .labelGroup span {
+}
+
+.labelGroup span {
     padding: 8px 4px;
-  }
- 
-  .labelGroup input {
+}
+
+.labelGroup input {
     padding: 6px;
     border: 1px solid #aaa;
     border-radius: 4px;
-  }
- 
-  .textareaGroup { /* textarea-group */
+}
+
+.textareaGroup { /* textarea-group */
     margin-bottom: 30px;
-  }
- 
-  .textareaGroup label {
+}
+
+.textareaGroup label {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
     color: #333;
-  }
- 
-  .textareaGroup textarea {
+}
+
+.textareaGroup textarea {
     width: 100%;
     padding: 10px;
     border: 1px solid #aaa;
     border-radius: 4px;
     resize: vertical;
-  }
- 
-  .formButtons { /* form-buttons */
+}
+
+.formButtons {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 30px;
+    gap: 20px;
+}
+
+.leftButtons {
+    display: flex;
     gap: 12px;
-  }
- 
-  .saveButton { /* save-button */
+}
+
+.rightButtons {
+    display: flex;
+    gap: 12px;
+}
+
+.reportButton {
     background-color: #0066ff;
-    color: white;
+    color: #fff;
     border: none;
     padding: 8px 20px;
     border-radius: 20px;
     font-size: 14px;
     cursor: pointer;
-  }
- 
-  .completeButton { /* complete-button */
+}
+
+.reportButtonDisabled {
     background-color: #eee;
     color: #aaa;
     border: none;
@@ -81,9 +92,31 @@
     border-radius: 20px;
     font-size: 14px;
     cursor: not-allowed;
-  }
- 
-  .blurOverlay { /* blur-overlay */
+}
+
+.saveButton { /* save-button */
+    background-color: #0066ff;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    margin-left: auto;
+    margin-right: 10px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.completeButton { /* complete-button */
+    background-color: #eee;
+    color: #aaa;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: not-allowed;
+}
+
+.blurOverlay { /* blur-overlay */
     position: fixed;
     top: 0;
     left: 0;
@@ -93,13 +126,13 @@
     background: rgba(255, 255, 255, 0.6);
     z-index: 900;
     display: none;
-  }
+}
 
-  .active {
-    display: block !important; /* !important는 다른 스타일에 의해 덮어씌워지는 것을 방지하기 위함 */
-  }
- 
-  .modalBox { /* modal-box */
+.active {
+    display: block !important;
+}
+
+.modalBox { /* modal-box */
     position: fixed;
     top: 50%;
     left: 50%;
@@ -111,15 +144,15 @@
     text-align: center;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
     z-index: 1000;
-  }
- 
-  .modalTitle { /* modal-title */
+}
+
+.modalTitle { /* modal-title */
     font-size: 18px;
     margin-bottom: 20px;
     font-weight: bold;
-  }
- 
-  .uploadArea { /* upload-area */
+}
+
+.uploadArea { /* upload-area */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -129,54 +162,66 @@
     cursor: pointer;
     color: #888;
     font-size: 14px;
-  }
+}
 
-  .hashModalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 2100;
+/* 해시 검증 모달 및 보고서 업로드 모달에 공통적으로 사용되는 스타일 */
+.hashModalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2100;
+    display: flex; /* 추가 */
+    justify-content: center; /* 추가 */
+    align-items: center; /* 추가 */
 }
 
 .hashModalBackdrop {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255,255,255,0.7);
-  z-index: 2101;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(255,255,255,0.7);
+    z-index: 2101;
 }
 
 .hashModalContent {
-  background-color: #fff;
-  border: 1px solid #aeaeae;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.08);
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  min-width: 400px;
-  width: 440px;
-  padding: 32px 36px;
-  z-index: 2102;
-  align-items: flex-start;
+    background-color: #fff;
+    border: 1px solid #aeaeae;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    min-width: 400px;
+    width: 440px;
+    padding: 32px 36px;
+    z-index: 2102;
+    align-items: flex-start;
 }
 
 .uploadTitle {
-  color: #0066ff;
-  font-weight: bold;
-  margin-bottom: 20px;
-  font-size: 18px;
-  text-align: left;
-  width: 100%;
+    color: #0066ff;
+    font-weight: bold;
+    margin-bottom: 20px;
+    font-size: 18px;
+    text-align: left;
+    width: 100%;
 }
 
 .formButtonsHashModal {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 28px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.uploadContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
 }
