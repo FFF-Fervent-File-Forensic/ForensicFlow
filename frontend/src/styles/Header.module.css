@@ -13,9 +13,17 @@
 
 .nav {
   display: flex;
-  justify-content: space-around;
-  max-width: 1200px;
+  align-items: center;
+  justify-content: space-between; 
+  max-width: 1200px; 
   margin: 0 auto;
+}
+
+.navLinks {
+  display: flex;
+  justify-content: space-between; 
+  flex-grow: 1;  
+  margin-right: 30px; 
 }
 
 .navLink {
@@ -41,4 +49,10 @@
   background-color: rgba(0, 0, 0, 0.05);
   cursor: not-allowed;
   pointer-events: none;
+}
+
+.adminButton {
+  margin-left: 3rem;
+  font-size: 1.5rem;
+  text-decoration: none;
 }
