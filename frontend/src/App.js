@@ -9,6 +9,7 @@ import ReportPage from "./pages/ReportPage";
 import DataRegister from "./pages/DataRegister";
 import DataTransfer from "./pages/DataTransfer";
 import CaseAdmin from "./pages/CaseAdmin";
+import CaseInfo from "./pages/CaseInfo";
 import { EvidenceProvider } from "./contexts/EvidenceContext";
 import Header from "./components/Header";
 
@@ -37,6 +38,9 @@ function App() {
             <Route path="/register" element={<DataRegister />} />
             <Route path="/transfer" element={<DataTransfer />} />
             <Route path="/admin" element={<CaseAdmin />} />
+            <Route path="/caseinfo" element={<CaseInfo />} />
+              
+              
           </Route>
         </Routes>
       </BrowserRouter>

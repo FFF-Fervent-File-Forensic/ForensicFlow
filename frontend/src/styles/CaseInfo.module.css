@@ -1,0 +1,131 @@
+/* CaseInfo.module.css */
+
+.caseInfoContainer {
+    padding: 30px 40px 30px 80px;
+    font-family: 'Pretendard', sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.backButton {
+    background: none;
+    border: 1px solid #ddd;
+    color: #555;
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.backButton:hover {
+    background-color: #f0f0f0;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #222;
+    margin: 0;
+}
+
+.infoCard {
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #d1d1d1;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    flex-grow: 1;
+    padding: 30px;
+}
+
+.formSection {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.sectionTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #007aff;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #007aff;
+    display: inline-block;
+}
+
+.formRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 15px;
+}
+
+.formCol {
+    flex: 1 1 calc(50% - 15px);
+    min-width: 200px;
+    margin-bottom: 15px;
+}
+
+.formColFull {
+    flex: 1 1 100%;
+    margin-bottom: 15px;
+}
+
+.formColHalf {
+    flex: 1 1 calc(50% - 15px);
+    min-width: 200px;
+}
+
+.label {
+    font-size: 13px;
+    color: #888;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.displayValue {
+    font-size: 15px;
+    color: #333;
+    padding: 8px 0;
+    border-bottom: 1px solid #ccc;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 30px;
+}
+
+.textareaDisplay {
+    border: 1px solid #eee;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 6px;
+    min-height: 80px;
+    line-height: 1.5;
+}
+
+.fileName {
+    color: #007aff;
+    font-weight: 500;
+}
+
+.actionButtons {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.analyzeButton {
+    background-color: #aaa;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 25px;
+    cursor: not-allowed;
+}
+
+.infoCard > .formSection:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
