@@ -39,6 +39,8 @@ function App() {
             <Route path="/transfer" element={<DataTransfer />} />
             <Route path="/admin" element={<CaseAdmin />} />
             <Route path="/caseinfo" element={<CaseInfo />} />
+              
+              
           </Route>
         </Routes>
       </BrowserRouter>
