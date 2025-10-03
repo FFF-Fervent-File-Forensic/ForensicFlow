@@ -4,8 +4,8 @@ from sqlalchemy.orm import sessionmaker, relationship, Session
 from datetime import date
 import random
 
-# 1. DB 연결 설정. 현재 localHost DB로 개발중이므로, 서버 구축되면 DATABASE_URL 수정 필요
-SQLALCHEMY_DATABASE_URL = "mysql+pymysql://root:006132asD!dks@localhost:3306/forensic_db"
+# 1. DB 연결 설정
+SQLALCHEMY_DATABASE_URL = "mysql+pymysql://freedb_forensic:V3fwX87P%25z%26%2AwKg@sql.freedb.tech:3306/freedb_forensic_assist"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=False)
 
 
@@ -24,6 +24,7 @@ class CaseTable(Base):
     present_stair = Column(String(100))
     doc_file_path = Column(String(255))
     case_occur_location = Column(String(255))
+    case_occur_date = Column(Date)
     commission_period = Column(String(100))
     commission_date = Column(String(100))
     related_person_info = Column(String(255))
@@ -134,6 +135,7 @@ def createCase(
     present_stair: str,
     doc_file_path: str,
     case_occur_location: str,
+    case_occur_date: str,
     commission_period: str,
     commission_date: str,
     related_person_info: str
@@ -147,6 +149,7 @@ def createCase(
         present_stair=present_stair,
         doc_file_path=doc_file_path,
         case_occur_location=case_occur_location,
+        case_occur_date=case_occur_date,
         commission_period=commission_period,
         commission_date=commission_date,
         related_person_info=related_person_info
@@ -663,33 +666,35 @@ def deleteMemberCase(member_id: int, case_id: int) -> bool:
 
 # 테스트용 코드
 
-def test_all_tables():
+def test_all_tables(delete: bool):
     print("\n=== CASE TABLE TEST ===")
-    # 1. CaseTable 데이터 생성
-    case = createCase(
-        case_number=12345,
-        case_type="사기 범죄",
-        case_overview="A가 B를 상대로 사기를 저지름",
-        present_stair="진행 중",
-        doc_file_path="/cases/12345",
-        case_occur_location="서울",
-        commission_period="2025-01-01 ~ 2025-01-31",
-        commission_date="2025-01-01",
-        related_person_info="A, B"
-    )
-    print("생성된 Case ID:", case.id)
+    if not delete:
+        # 1. CaseTable 데이터 생성
+        case = createCase(
+            case_number=12345,
+            case_type="사기 범죄",
+            case_overview="A가 B를 상대로 사기를 저지름",
+            present_stair="진행 중",
+            doc_file_path="/cases/12345",
+            case_occur_location="서울",
+            case_occur_date=Date(2025, 1, 1),
+            commission_period="2025-01-01 ~ 2025-01-31",
+            commission_date="2025-01-01",
+            related_person_info="A, B"
+        )
+        print("생성된 Case ID:", case.id)
 
-    # 2. Case 조회
-    case_data = getCase(case.id)
-    print("조회된 Case:", case_data)
+        # 2. Case 조회
+        case_data = getCase(case.id)
+        print("조회된 Case:", case_data)
 
-    # 3. Case ID 리스트 조회
-    case_ids = getCaseList()
-    print("모든 Case ID:", case_ids)
+        # 3. Case ID 리스트 조회
+        case_ids = getCaseList()
+        print("모든 Case ID:", case_ids)
 
-    # 4. Case 삭제
-    deleteCase(case.id)
-    print("Case 삭제 후 리스트:", getCaseList())
+        # 4. Case 삭제
+        deleteCase(case.id)
+        print("Case 삭제 후 리스트:", getCaseList())
 
     print("\n=== EVIDENCE TABLE TEST ===")
     # Case를 다시 생성 (외래 키 필요)
@@ -700,6 +705,7 @@ def test_all_tables():
         present_stair="진행 중",
         doc_file_path="/cases/12345",
         case_occur_location="서울",
+        case_occur_date=date(2024, 1, 1),
         commission_period="2025-01-01 ~ 2025-01-31",
         commission_date="2025-01-01",
         related_person_info="A, B"
@@ -730,8 +736,9 @@ def test_all_tables():
     print(f"Case {case.id}에 속한 Evidence ID 리스트:", evidence_ids)
 
     # Evidence 삭제
-    deleteEvidence(evidence.id)
-    print(f"Evidence 삭제 후 리스트:", getEvidenceList(case.id))
+    if not delete:
+        deleteEvidence(evidence.id)
+        print(f"Evidence 삭제 후 리스트:", getEvidenceList(case.id))
 
     print("\n=== TRANSFER INFORMATION TEST ===")
     # 새 Evidence 생성
@@ -771,8 +778,9 @@ def test_all_tables():
     print("생성된 TransferInformation ID:", transfer.id)
     print("조회 TransferInformation:", getTransferInfo(transfer.id))
     print("Evidence에 속한 Transfer 정보 ID 리스트:", getTransferInfoList(evidence.id))
-    deleteTransferInfo(transfer.id)
-    print("삭제 후 Transfer 정보 ID 리스트:", getTransferInfoList(evidence.id))
+    if not delete:
+        deleteTransferInfo(transfer.id)
+        print("삭제 후 Transfer 정보 ID 리스트:", getTransferInfoList(evidence.id))
 
     print("\n=== ANALYSIS INFORMATION TEST ===")
     analysis = createAnalysisInfo(
@@ -790,8 +798,9 @@ def test_all_tables():
     print("생성된 AnalysisInformation ID:", analysis.id)
     print("조회 AnalysisInformation:", getAnalysisInfo(analysis.id))
     print("Evidence에 속한 Analysis 정보 ID 리스트:", getAnalysisInfoList(evidence.id))
-    deleteAnalysisInfo(analysis.id)
-    print("삭제 후 Analysis 정보 ID 리스트:", getAnalysisInfoList(evidence.id))
+    if not delete:
+        deleteAnalysisInfo(analysis.id)
+        print("삭제 후 Analysis 정보 ID 리스트:", getAnalysisInfoList(evidence.id))
 
     print("\n=== MEMBER TABLE TEST ===")
     randomValue = random.randint(100000, 999999)
@@ -805,8 +814,9 @@ def test_all_tables():
     print("생성된 Member ID:", member.id)
     print("조회 Member:", getMember(member.id))
     print("모든 Member ID 리스트:", getMemberList())
-    deleteMember(member.id)
-    print("Member 삭제 후 ID 리스트:", getMemberList())
+    if not delete:
+        deleteMember(member.id)
+        print("Member 삭제 후 ID 리스트:", getMemberList())
 
     print("\n=== MEMBERCASE TABLE TEST ===")
     # Member와 Case 다시 생성
@@ -821,21 +831,26 @@ def test_all_tables():
     print("생성된 MemberCase ID:", mc.id)
     print("Member가 접근 가능한 Case ID 리스트:", getCasesByMember(member.id))
     print("Case에 접근 가능한 Member ID 리스트:", getMembersByCase(case.id))
-    deleteMemberCase(member.id, case.id)
-    print("삭제 후 Case 접근 Member 리스트:", getMembersByCase(case.id))
+    if not delete:
+        deleteMemberCase(member.id, case.id)
+        print("삭제 후 Case 접근 Member 리스트:", getMembersByCase(case.id))
 
 print("< ---------------- 실행 시작 ----------------->")
 
-TEST = 2
-CASE_ID = 4
 
 if __name__ == "__main__":
 
+    TEST = 3
+    CASE_ID = 4
+
     if TEST % 2 == 0:
         # 전체 쿼리 테스트
-        test_all_tables()
-
+        test_all_tables(False)
+    
     if TEST % 3 == 0:
+        test_all_tables(True)
+
+    if TEST % 5 == 0:
         # 케이스 및 멤버 전체 삭제
         for case in getCaseList():
             deleteCase(case)
