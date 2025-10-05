@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
 from datetime import date
+import hashlib
 import backend
 
 app = FastAPI()
@@ -84,6 +85,13 @@ class MemberCaseCreate(BaseModel):
     member_id: int
     case_id: int
     authority: str
+
+@app.post("/hashfile")
+def hash_file(file: UploadFile = File(...)):
+    sha256 = hashlib.sha256()
+    content = file.file.read()
+    sha256.update(content)
+    return {"sha256": sha256.hexdigest()}
 
 @app.post("/createCase")
 def create_case(case: CaseCreate):
