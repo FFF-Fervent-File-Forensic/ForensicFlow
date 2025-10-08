@@ -5,6 +5,40 @@ import styles from "../styles/AnalysisInputForm.module.css";
 
 import HashVerifierFooter from '../components/HashVerifierFooter';
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8000";
+
+async function postCreateAnalysisMultipart({ form, file, evidenceId }) {
+  const fd = new FormData();
+
+  fd.append("analysis_location", form.location);
+  fd.append("analysis_manager", form.analyst);
+  fd.append("analysis_tool", form.tool);
+  fd.append("analysis_list", form.item);
+  fd.append("analysis_process", form.procedure);
+  fd.append("analysis_result", form.result);
+
+  // 해시검증 성공/완료 상태 값
+  fd.append("a_hash_validation_status", String(true));
+  fd.append("complete_status", String(true));
+  fd.append("evidence_id", String(evidenceId));
+
+  // 파일이 있을 때만 첨부
+  if (file) {
+    fd.append("file", file);
+  }
+
+  const res = await fetch(`${API_BASE}/createAnalysis`, {
+    method: "POST",
+    body: fd,
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`CreateAnalysis 실패: ${res.status} ${detail}`);
+  }
+  return res.json();
+}
+
 export default function AnalysisInputForm() {
   const [form, setForm] = useState({
     location: "",
@@ -54,18 +88,36 @@ export default function AnalysisInputForm() {
     }
     setShowModal(true);
     setIsHashVerified(false);
-    setFile(null);
   };
 
-  const onHashValid = () => {
-    setIsHashVerified(true);
-    console.log("해시 검증 성공! 분석 정보가 저장됩니다.");
+const onHashValid = async () => {
+  setIsHashVerified(true);
+  console.log("해시 검증 성공! (옵션) 파일 업로드 + DB 저장 요청 시작.");
+
+  try {
+    const evidenceId = Number(currentEvidence?.id ?? 1);
+
+    // 파일 없으면 그냥 파일 없이 전송됨
+    const created = await postCreateAnalysisMultipart({
+      form,
+      file,        // 없을 수 있음
+      evidenceId,
+    });
+
+    console.log("백엔드 저장 완료:", created);
+
     if (currentEvidence) {
       addAnalysisInfo(currentEvidence.name, form);
     }
+
     setShowModal(false);
     navigate("/analyze");
-  };
+  } catch (err) {
+    console.error(err);
+    alert(`분석 정보 저장 중 오류가 발생했습니다.\n${String(err)}`);
+  }
+};
+
 
   const onHashInvalid = () => {
     setIsHashVerified(false);
