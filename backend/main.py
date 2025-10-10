@@ -78,8 +78,6 @@ class MemberCreate(BaseModel):
     login_email: str
     login_password: str
     member_name: str
-    case_number: int
-    authority: str
 
 class MemberCaseCreate(BaseModel):
     member_id: int
