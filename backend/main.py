@@ -25,8 +25,8 @@ class CaseCreate(BaseModel):
     doc_file_path: str
     case_occur_location: str
     case_occur_date: date
-    commission_period: str
-    commission_date: str
+    commission_agency: str
+    commission_date: date
     related_person_info: str
 
 class EvidenceCreate(BaseModel):

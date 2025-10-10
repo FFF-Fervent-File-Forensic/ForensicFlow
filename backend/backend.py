@@ -25,8 +25,8 @@ class CaseTable(Base):
     doc_file_path = Column(String(255))
     case_occur_location = Column(String(255))
     case_occur_date = Column(Date)
-    commission_period = Column(String(100))
-    commission_date = Column(String(100))
+    commission_agency = Column(String(100))
+    commission_date = Column(Date)
     related_person_info = Column(String(255))
 
     evidences = relationship("Evidence", back_populates="case", cascade="all, delete")
@@ -134,7 +134,7 @@ def createCase(
     doc_file_path: str,
     case_occur_location: str,
     case_occur_date: str,
-    commission_period: str,
+    commission_agency: str,
     commission_date: str,
     related_person_info: str
 ) -> CaseTable:
@@ -148,7 +148,7 @@ def createCase(
         doc_file_path=doc_file_path,
         case_occur_location=case_occur_location,
         case_occur_date=case_occur_date,
-        commission_period=commission_period,
+        commission_agency=commission_agency,
         commission_date=commission_date,
         related_person_info=related_person_info
     )
@@ -185,7 +185,7 @@ def getCase(case_id: int) -> dict:
             "present_stair": case.present_stair,
             "doc_file_path": case.doc_file_path,
             "case_occur_location": case.case_occur_location,
-            "commission_period": case.commission_period,
+            "commission_agency": case.commission_agency,
             "commission_date": case.commission_date,
             "related_person_info": case.related_person_info,
         }
@@ -679,8 +679,8 @@ def test_all_tables(delete: bool):
             doc_file_path="/cases/12345",
             case_occur_location="서울",
             case_occur_date=Date(2025, 1, 1),
-            commission_period="2025-01-01 ~ 2025-01-31",
-            commission_date="2025-01-01",
+            commission_agency="춘천지방검찰청",
+            commission_date=Date(2025, 1, 31),
             related_person_info="A, B"
         )
         print("생성된 Case ID:", case.id)
@@ -707,8 +707,8 @@ def test_all_tables(delete: bool):
         doc_file_path="/cases/12345",
         case_occur_location="서울",
         case_occur_date=date(2024, 1, 1),
-        commission_period="2025-01-01 ~ 2025-01-31",
-        commission_date="2025-01-01",
+        commission_agency="춘천지방검찰청",
+        commission_date=date(2024, 1, 31),
         related_person_info="A, B"
     )
     evidence = createEvidence(
