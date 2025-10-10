@@ -588,6 +588,15 @@ def deleteMember(member_id: int) -> bool:
     finally:
         db.close()
 
+# 이메일 기준으로 Member 정보 조회
+def getMemberByEmail(login_email: str) -> Member | None:
+    db = SessionLocal()
+    try:
+        member = db.query(Member).filter(Member.login_email == login_email).first()
+        return member  # Member 객체 그대로 반환 (없으면 None)
+    finally:
+        db.close()
+
 # =====================
 # == MemberCase 함수 ==
 # =====================
