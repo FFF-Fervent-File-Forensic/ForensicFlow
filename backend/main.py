@@ -78,13 +78,15 @@ class MemberCreate(BaseModel):
     login_email: str
     login_password: str
     member_name: str
-    case_number: int
-    authority: str
 
 class MemberCaseCreate(BaseModel):
     member_id: int
     case_id: int
     authority: str
+
+class LoginRequest(BaseModel):
+    login_email: str
+    login_password: str
 
 @app.post("/hashfile")
 def hash_file(file: UploadFile = File(...)):
@@ -279,6 +281,25 @@ def get_member(member_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/login")
+def login(request: LoginRequest):
+    try:
+        db_member = backend.getMemberByEmail(request.login_email)
+        if not db_member:
+            raise HTTPException(status_code=404, detail="존재하지 않는 이메일입니다.")
+        
+        if db_member.login_password != request.login_password:
+            raise HTTPException(status_code=401, detail="비밀번호가 올바르지 않습니다.")
+        
+        return {
+            "success": True,
+            "member_id": db_member.id,
+            "member_name": db_member.member_name,
+            "login_email": db_member.login_email
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 @app.delete("/deleteMember/{member_id}")
 def delete_member(member_id: int):
     try:
@@ -336,3 +357,4 @@ def delete_member_case(member_id: int, case_id: int):
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+

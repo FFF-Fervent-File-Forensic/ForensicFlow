@@ -101,8 +101,6 @@ class Member(Base):
     login_email = Column(String(100))
     login_password = Column(String(100))
     member_name = Column(String(100))
-    case_number = Column(Integer)
-    authority = Column(String(100))
 
     member_cases = relationship("MemberCase", back_populates="member", cascade="all, delete")
 
@@ -526,8 +524,6 @@ def createMember(
     login_email: str,
     login_password: str,
     member_name: str,
-    case_number: int,
-    authority: str
 ) -> Member:
     db = SessionLocal()
     try:
@@ -535,8 +531,6 @@ def createMember(
             login_email=login_email,
             login_password=login_password,
             member_name=member_name,
-            case_number=case_number,
-            authority=authority
         )
         db.add(new_member)
         db.commit()
@@ -571,8 +565,6 @@ def getMember(member_id: int) -> dict:
             "login_email": member.login_email,
             "login_password": member.login_password,
             "member_name": member.member_name,
-            "case_number": member.case_number,
-            "authority": member.authority
         }
         return member_dict
     finally:
@@ -593,6 +585,15 @@ def deleteMember(member_id: int) -> bool:
         db.commit()
         print(f"삭제 완료 : Member ID {member_id}")
         return True
+    finally:
+        db.close()
+
+# 이메일 기준으로 Member 정보 조회
+def getMemberByEmail(login_email: str) -> Member | None:
+    db = SessionLocal()
+    try:
+        member = db.query(Member).filter(Member.login_email == login_email).first()
+        return member  # Member 객체 그대로 반환 (없으면 None)
     finally:
         db.close()
 
@@ -808,8 +809,6 @@ def test_all_tables(delete: bool):
         login_email="test" + str(randomValue) + "@example.com",
         login_password="1234",
         member_name="홍길동",
-        case_number=case.case_number,
-        authority="admin"
     )
     print("생성된 Member ID:", member.id)
     print("조회 Member:", getMember(member.id))
@@ -824,8 +823,6 @@ def test_all_tables(delete: bool):
         login_email="test2@example.com",
         login_password="1234",
         member_name="김철수",
-        case_number=case.case_number,
-        authority="user"
     )
     mc = createMemberCase(member_id=member.id, case_id=case.id, authority="읽기")
     print("생성된 MemberCase ID:", mc.id)

@@ -8,6 +8,7 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -17,19 +18,42 @@ function Signup() {
     email.trim() !== "" &&
     password.trim() !== "" &&
     confirmPassword.trim() !== "";
-
-  const isFormValid = isFormFilled && isPasswordMatch;
-
-  const handleSignup = () => {
+  const isFormValid = isFormFilled && isPasswordMatch && !isSubmitting; // 중복 전송 방지
+  const handleSignup = async () => {
     if (!isPasswordMatch) {
       setErrorMessage("비밀번호가 일치하지 않습니다.");
       return;
     }
+
     setErrorMessage("");
-    console.log("회원가입 완료");
-    
-    alert("회원가입이 완료되었습니다!");
-    navigate("/");
+    setIsSubmitting(true); //중복 클릭 방지 시작
+
+    try {
+      const response = await fetch("http://localhost:8000/createMember", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          login_email: email,
+          login_password: password,
+          member_name: name,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setErrorMessage(data.detail || "회원가입 실패");
+        setIsSubmitting(false); // 실패 시 다시 클릭 가능
+        return;
+      }
+
+      alert("회원가입이 완료되었습니다!");
+      navigate("/");
+    } catch (error) {
+      console.error("회원가입 오류:", error);
+      setErrorMessage("서버와 통신할 수 없습니다.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -64,15 +88,17 @@ function Signup() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        {!isPasswordMatch && (
-          <div className={styles["error-message"]}>비밀번호가 일치하지 않습니다.</div>
+        {errorMessage && (
+          <div className={styles["error-message"]}>{errorMessage}</div>
         )}
         <button
-          className={`${styles["btn"]} ${isFormValid ? styles["btn-active"] : styles["btn-disabled"]}`}
+          className={`${styles["btn"]} ${
+            isFormValid ? styles["btn-active"] : styles["btn-disabled"]
+          }`}
           disabled={!isFormValid}
           onClick={handleSignup}
         >
-          회원가입
+          {isSubmitting ? "처리 중..." : "회원가입"}
         </button>
       </div>
     </div>
