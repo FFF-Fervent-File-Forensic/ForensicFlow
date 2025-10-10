@@ -8,6 +8,7 @@ function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -17,8 +18,7 @@ function Signup() {
     email.trim() !== "" &&
     password.trim() !== "" &&
     confirmPassword.trim() !== "";
-  const isFormValid = isFormFilled && isPasswordMatch;
-
+  const isFormValid = isFormFilled && isPasswordMatch && !isSubmitting; // 중복 전송 방지
   const handleSignup = async () => {
     if (!isPasswordMatch) {
       setErrorMessage("비밀번호가 일치하지 않습니다.");
@@ -26,6 +26,7 @@ function Signup() {
     }
 
     setErrorMessage("");
+    setIsSubmitting(true); //중복 클릭 방지 시작
 
     try {
       const response = await fetch("http://localhost:8000/createMember", {
@@ -42,14 +43,16 @@ function Signup() {
 
       if (!response.ok) {
         setErrorMessage(data.detail || "회원가입 실패");
+        setIsSubmitting(false); // 실패 시 다시 클릭 가능
         return;
       }
 
       alert("회원가입이 완료되었습니다!");
-      navigate("/"); // 회원가입 후 로그인 페이지로 이동
+      navigate("/");
     } catch (error) {
       console.error("회원가입 오류:", error);
       setErrorMessage("서버와 통신할 수 없습니다.");
+      setIsSubmitting(false);
     }
   };
 
@@ -95,7 +98,7 @@ function Signup() {
           disabled={!isFormValid}
           onClick={handleSignup}
         >
-          회원가입
+          {isSubmitting ? "처리 중..." : "회원가입"}
         </button>
       </div>
     </div>
