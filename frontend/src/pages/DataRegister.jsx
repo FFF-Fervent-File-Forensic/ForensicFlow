@@ -1,106 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '../styles/DataRegister.module.css';
 import { useNavigate } from 'react-router-dom';
-import { useEvidence } from '../contexts/EvidenceContext';
-import { calculateHash } from '../components/HashGeneratorHeader';
+
+// 개발 및 디버깅을 위한 하드 코딩. 추후 수정 필요
+const CURRENT_CASEID = 1;
+
+const response = await fetch(`http://localhost:8000/getEvidenceList/1`);
+const evidenceIDList = await response.json();
 
 export default function EvidenceManager() {
-  const { evidenceInfo, addEvidence } = useEvidence();
-
-  const [isUploadUIVisible, setIsUploadUIVisible] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [signatureFile, setSignatureFile] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    hash: '',
-    size: '',
-    type: '',
-    담당자: '',
-    사용자: '',
-    증거종류: '',
-    제조사: '',
-    모델명: '',
-    수집장소: '',
-    제조일시: '',
-    보관장소: '',
-    고유번호: '',
-    수집일시: '',
-  });
-
   const navigate = useNavigate();
 
-  const requiredFields = ['담당자', '사용자', 'type', '제조사', '모델명', '수집장소', '보관장소', '고유번호', '제조일시', '수집일시'];
-  const isFormValid = requiredFields.every((key) => formData[key] && formData[key] !== '') && !!signatureFile && !!formData.hash;
+  // Evidence ID 리스트
+  const [EList, setEList] = useState(evidenceIDList.ids);
 
-  const handleFileSelect = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const sizeInGB = (file.size / (1024 ** 3)).toFixed(2);
-      const hash = await calculateHash(file);
-      setFormData((prev) => ({
-        ...prev,
-        name: file.name,
-        size: `${sizeInGB} GB`,
-        hash,
-      }));
-    }
-  };
+  // Evidence 데이터 목록
+  const [evidenceInfo, setEvidenceInfo] = useState([]);
 
-  const handleHashCalculated = (hash) => {
-    setFormData((prev) => ({
-      ...prev,
-      hash,
-    }));
-  };
+  // 서버 응답 상태
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleRegisterClick = () => {
-    if (!isFormValid) {
-      alert('필수 항목을 모두 입력하고 서명 및 파일 업로드를 완료해주세요.');
-      return;
-    }
-    const dateObj = new Date(formData.수집일시);
-    const formattedDate = `${dateObj.getFullYear()}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}`;
+  // 컴포넌트가 처음 렌더링될 때 DB에서 증거 데이터 불러오기
+  useEffect(() => {
+    const fetchEvidenceData = async () => {
+      setIsLoading(true); // 서버 응답 대기 상태 시작
 
-    const evidenceItem = {
-      name: formData.name,
-      type: formData.type,
-      date: formattedDate,
-      hash: formData.hash,
-      size: formData.size,
-      담당자: formData.담당자,
-      사용자: formData.사용자,
-      증거종류: formData.증거종류,
-      제조사: formData.제조사,
-      모델명: formData.모델명,
-      수집장소: formData.수집장소,
-      제조일시: formData.제조일시,
-      보관장소: formData.보관장소,
-      고유번호: formData.고유번호,
-      서명파일: signatureFile,
+      try {
+        const results = [];
+
+        // EList의 각 ID에 대해 fetch 수행
+        for (const id of EList) {
+          const response = await fetch(`http://localhost:8000/getEvidence/${id}`);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch evidence with id ${id}`);
+          }
+
+          const result = await response.json();
+
+          // result에는 DB에서 반환한 Evidence 데이터가 들어 있음
+          results.push({
+            name: result.evidence_name,
+            type: result.type,
+            date: result.collect_date,
+          });
+        }
+
+        setEvidenceInfo(results); // evidenceTable 데이터 갱신
+      } catch (error) {
+        console.error("Error fetching evidence data:", error);
+        alert("서버로부터 데이터를 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setIsLoading(false); // 로딩 종료
+      }
     };
 
-    addEvidence(evidenceItem);
-    setSelectedFile(null);
-    setFormData({
-      name: '',
-      hash: '',
-      size: '',
-      type: '',
-      담당자: '',
-      사용자: '',
-      증거종류: '',
-      제조사: '',
-      모델명: '',
-      수집장소: '',
-      제조일시: '',
-      보관장소: '',
-      고유번호: '',
-      수집일시: '',
-    });
-    setSignatureFile(null);
-    setIsUploadUIVisible(false);
-  };
+    fetchEvidenceData();
+  }, [EList]);
 
   return (
     <div className={styles.container}>
@@ -114,171 +69,38 @@ export default function EvidenceManager() {
             </tr>
           </thead>
           <tbody>
-            {(evidenceInfo || []).map((item, idx) => (
-              <tr key={idx}>
-                <td>{item.name}</td>
-                <td>{item.type}</td>
-                <td>{item.date}</td>
+            {isLoading ? (
+              <tr>
+                <td colSpan="3" style={{ textAlign: 'center', color: '#888' }}>
+                  서버 응답 대기 중..
+                </td>
               </tr>
-            ))}
+            ) : evidenceInfo.length > 0 ? (
+              evidenceInfo.map((item, idx) => (
+                <tr key={idx}>
+                  <td>{item.name}</td>
+                  <td>{item.type}</td>
+                  <td>{item.date}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" style={{ textAlign: 'center', color: '#aaa' }}>
+                  불러올 데이터가 없습니다.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
+
       <div className={styles.rightPane}>
-        {!isUploadUIVisible ? (
-          <button className={styles.addButton} onClick={() => setIsUploadUIVisible(true)}>
-            + 신규 증거 등록
-          </button>
-        ) : (
-          <div className={styles.uploadBox}>
-            {!selectedFile ? (
-              <div className={styles.fileDrop} onClick={() => document.getElementById('fileInput').click()}>
-                파일을 업로드하세요.
-                <input id="fileInput" type="file" onChange={handleFileSelect} style={{ display: 'none' }} />
-              </div>
-            ) : (
-              <>
-                <p><strong>이름:</strong> {formData.name}</p>
-                <p><strong>용량:</strong> {formData.size}</p>
-                <div className={styles.inputRow}>
-                  <label className={styles.inputLabel}>해시값</label>
-                  <div style={{
-                    wordBreak: 'break-all'
-                  }}>
-                    {formData.hash || '아직 생성되지 않았습니다.'}
-                  </div>
-                </div>
-                <div className={styles.inputRow} style={{ gap: '8px' }}>
-                  <label className={styles.inputLabel}>담당자</label>
-                  <input className={styles.inputField} value={formData.담당자} onChange={e => setFormData({ ...formData, 담당자: e.target.value })} />
-                  <button
-                    type="button"
-                    onClick={() => document.getElementById('signatureInput').click()}
-                    style={{ padding: '6px 20px', borderRadius: '6px', border: '1px solid #ccc', background: '#f5f5f5', cursor: 'pointer', fontWeight: 'bold', whiteSpace: 'nowrap' }}
-                  >
-                    서명
-                  </button>
-                  <input
-                    id="signatureInput"
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={e => {
-                      if (e.target.files && e.target.files[0]) {
-                        setSignatureFile(e.target.files[0]);
-                      }
-                    }}
-                  />
-                </div>
-                {signatureFile && <div style={{ fontSize: '13px', color: '#007bff', marginBottom: '4px' }}>첨부된 서명: {signatureFile.name}</div>}
-
-                <div className={styles.inputRow}>
-                  <label className={styles.inputLabel}>사용자</label>
-                  <input className={styles.inputField} value={formData.사용자} onChange={e => setFormData({ ...formData, 사용자: e.target.value })} />
-                </div>
-
-                <div className={styles.inputRow}>
-                  <label className={styles.inputLabel}>종류</label>
-                  <select
-                    className={styles.inputField}
-                    value={formData.type}
-                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  >
-                    <option value="">선택</option>
-                    <option value="USB">USB</option>
-                    <option value="HDD">HDD</option>
-                    <option value="SSD">SSD</option>
-                  </select>
-                </div>
-
-                <div className={styles.row}>
-                  <div className={styles.inputRow}>
-                    <label className={styles.inputLabel}>제조사</label>
-                    <input className={styles.inputField} value={formData.제조사} onChange={e => setFormData({ ...formData, 제조사: e.target.value })} />
-                  </div>
-                  <div className={styles.inputRow}>
-                    <label className={styles.inputLabel}>모델명</label>
-                    <input className={styles.inputField} value={formData.모델명} onChange={e => setFormData({ ...formData, 모델명: e.target.value })} />
-                  </div>
-                </div>
-
-                <div className={styles.row}>
-                  <div className={styles.inputRow}>
-                    <label className={styles.inputLabel}>수집장소</label>
-                    <input className={styles.inputField} value={formData.수집장소} onChange={e => setFormData({ ...formData, 수집장소: e.target.value })} />
-                  </div>
-                  <div className={styles.inputRow}>
-                    <label className={styles.inputLabel}>보관장소</label>
-                    <input className={styles.inputField} value={formData.보관장소} onChange={e => setFormData({ ...formData, 보관장소: e.target.value })} />
-                  </div>
-                </div>
-
-                <div className={styles.inputRow}>
-                  <label className={styles.inputLabel}>고유번호</label>
-                  <input className={styles.inputField} value={formData.고유번호} onChange={e => setFormData({ ...formData, 고유번호: e.target.value })} />
-                </div>
-
-
-                <div className={styles.inputRow}>
-                  <label className={styles.inputLabel}>제조일시:</label>
-                  <input
-                    type="datetime-local"
-                    value={formData.제조일시}
-                    onChange={e => setFormData({ ...formData, 제조일시: e.target.value })}
-                    className={styles.inputField}
-                  />
-                </div>
-
-                <div className={styles.inputRow} style={{ marginTop: '10px' }}>
-                  <label className={styles.inputLabel}>수집일시:</label>
-                  <input
-                    type="datetime-local"
-                    value={formData.수집일시}
-                    onChange={e => setFormData({ ...formData, 수집일시: e.target.value })}
-                    className={styles.inputField}
-                  />
-                </div>
-
-
-
-                <div className={styles.formButtons}>
-                  <button onClick={() => {
-                    setIsUploadUIVisible(false);
-                    setSelectedFile(null);
-                    setFormData({
-                      name: '',
-                      hash: '',
-                      size: '',
-                      type: '',
-                      담당자: '',
-                      사용자: '',
-                      증거종류: '',
-                      제조사: '',
-                      모델명: '',
-                      수집장소: '',
-                      제조일시: '',
-                      보관장소: '',
-                      고유번호: '',
-                      수집일시: '',
-                    });
-                    setSignatureFile(null);
-                  }}>취소</button>
-                  <button
-                    onClick={handleRegisterClick}
-                    disabled={!formData.hash}
-                    style={{
-                      backgroundColor: isFormValid ? '#007bff' : '#ccc',
-                      color: isFormValid ? '#fff' : '#888'
-                    }}
-                  >등록</button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-      <div className={styles.bottomButton}>
-        <button onClick={() => navigate('/transfer')}>다음 단계</button>
+        <button
+          className={styles.addButton}
+          onClick={() => navigate('/transfer')}
+        >
+          다음 단계
+        </button>
       </div>
     </div>
   );
