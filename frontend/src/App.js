@@ -38,9 +38,8 @@ function App() {
             <Route path="/register" element={<DataRegister />} />
             <Route path="/transfer" element={<DataTransfer />} />
             <Route path="/admin" element={<CaseAdmin />} />
-            <Route path="/caseinfo" element={<CaseInfo />} />
-              
-              
+            <Route path="/caseinfo/:caseId" element={<CaseInfo />} />
+
           </Route>
         </Routes>
       </BrowserRouter>
