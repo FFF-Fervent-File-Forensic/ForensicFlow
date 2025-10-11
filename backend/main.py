@@ -97,6 +97,11 @@ class LoginRequest(BaseModel):
     login_email: str
     login_password: str
 
+class UpdateMemberCaseRequest(BaseModel):
+    member_id: int
+    case_id: int
+    authority: str
+
 @app.post("/hashfile")
 def hash_file(file: UploadFile = File(...)):
     sha256 = hashlib.sha256()
@@ -115,8 +120,8 @@ def create_case(case: CaseCreate):
 @app.get("/getCaseList")
 def get_case_list():
     try:
-        ids = backend.getCaseList()
-        return {"ids": ids}
+        cases = backend.getCaseList()
+        return {"cases": cases}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -334,8 +339,8 @@ def create_member(member: MemberCreate):
 @app.get("/getMemberList")
 def get_member_list():
     try:
-        ids = backend.getMemberList()
-        return {"ids": ids}
+        members = backend.getMemberList()
+        return {"members": members}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -398,11 +403,12 @@ def get_cases_by_member(member_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/getMembersByCase/{case_id}")
-def get_members_by_case(case_id: int):
+def get_members_by_case(case_id: int) -> dict[str, List[dict]]:
     try:
-        ids = backend.getMembersByCase(case_id)
-        return {"ids": ids}
+        result = backend.getMembersByCase(case_id)
+        return {"memberCases": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -426,3 +432,21 @@ def delete_member_case(member_id: int, case_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/updateMemberCase")
+def update_member_case_api(req: UpdateMemberCaseRequest):
+    try:
+        mc = backend.update_member_case(req.member_id, req.case_id, req.authority)
+        if not mc:
+            raise HTTPException(status_code=404, detail="해당 MemberCase가 존재하지 않습니다.")
+        return {
+            "id": mc.id,
+            "member_id": mc.member_id,
+            "case_id": mc.case_id,
+            "authority": mc.authority
+        }
+    except ValueError as ve:
+        # backend에서 ValueError 발생 시 404로 반환
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        print(f"[ERROR] update_member_case_api: {e}")
+        raise HTTPException(status_code=500, detail="권한 수정 중 서버 오류 발생")
