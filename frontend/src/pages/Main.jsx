@@ -215,7 +215,11 @@ function Main() {
             <div
               className={styles.caseCard}
               key={c.caseId}
-              onClick={() => navigate(`/caseinfo/${c.caseId}`)}
+              onClick={() => {
+                sessionStorage.setItem('caseId', c.caseId);
+                navigate(`/caseinfo/${c.caseId}`);
+                }
+              }
               style={{ cursor: 'pointer' }}
             >
               <div className={styles.folderIcon}>📁</div>
