@@ -119,7 +119,7 @@ function Main() {
         body: JSON.stringify({
           member_id: user.member_id,
           case_id: newCase.id,
-          authority: '등록자',
+          authority: 'master',
         }),
       });
       if (!mcRes.ok) throw new Error('MemberCase link failed');
