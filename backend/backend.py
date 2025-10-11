@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, create_engine, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, Boolean, create_engine, ForeignKey, Date, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, Session
-from datetime import date
+from datetime import datetime, date
 import random
 
 # 1. DB 연결 설정
@@ -18,16 +18,16 @@ Base = declarative_base()
 class CaseTable(Base):
     __tablename__ = "CaseTable"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    case_number = Column(Integer)
+    case_number = Column(String(100))
     case_type = Column(String(100))
-    case_overview = Column(String(255))
+    case_overview = Column(String(1000))
     present_stair = Column(String(100))
     doc_file_path = Column(String(255))
     case_occur_location = Column(String(255))
-    case_occur_date = Column(Date)
-    commission_period = Column(String(100))
-    commission_date = Column(String(100))
-    related_person_info = Column(String(255))
+    case_occur_date = Column(DateTime)
+    commission_agency = Column(String(100))
+    commission_date = Column(DateTime)
+    related_person_info = Column(String(1000))
 
     evidences = relationship("Evidence", back_populates="case", cascade="all, delete")
     members = relationship("MemberCase", back_populates="case", cascade="all, delete")
@@ -127,31 +127,31 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Case의 데이터를 매개변수로 받고 CaseTable 테이블에 데이터 추가
 def createCase(
-    case_number: int,
+    case_number: str,
     case_type: str,
     case_overview: str,
     present_stair: str,
     doc_file_path: str,
     case_occur_location: str,
-    case_occur_date: str,
-    commission_period: str,
-    commission_date: str,
+    case_occur_date: datetime,
+    commission_agency: str,
+    commission_date: datetime,
     related_person_info: str
 ) -> CaseTable:
     db = SessionLocal()
     try:
-        new_case = CaseTable (
-        case_number=case_number,
-        case_type=case_type,
-        case_overview=case_overview,
-        present_stair=present_stair,
-        doc_file_path=doc_file_path,
-        case_occur_location=case_occur_location,
-        case_occur_date=case_occur_date,
-        commission_period=commission_period,
-        commission_date=commission_date,
-        related_person_info=related_person_info
-    )
+        new_case = CaseTable(
+            case_number=case_number,
+            case_type=case_type,
+            case_overview=case_overview,
+            present_stair=present_stair,
+            doc_file_path=doc_file_path,
+            case_occur_location=case_occur_location,
+            case_occur_date=case_occur_date,
+            commission_agency=commission_agency,
+            commission_date=commission_date,
+            related_person_info=related_person_info
+        )
         db.add(new_case)
         db.commit()
         db.refresh(new_case)
@@ -185,13 +185,15 @@ def getCase(case_id: int) -> dict:
             "present_stair": case.present_stair,
             "doc_file_path": case.doc_file_path,
             "case_occur_location": case.case_occur_location,
-            "commission_period": case.commission_period,
-            "commission_date": case.commission_date,
+            "case_occur_date": case.case_occur_date.isoformat() if case.case_occur_date else None,
+            "commission_agency": case.commission_agency,
+            "commission_date": case.commission_date.isoformat() if case.commission_date else None,
             "related_person_info": case.related_person_info,
         }
         return case_dict
     finally:
         db.close()
+
 
 # Case의 id(기본 키)를 조회하여 해당 Case를 삭제. 추후 이 Table을 외래 키로 참조하는 데이터도 삭제하도록 수정 필요
 def deleteCase(case_id: int) -> bool:
@@ -675,12 +677,12 @@ def test_all_tables(delete: bool):
             case_number=12345,
             case_type="사기 범죄",
             case_overview="A가 B를 상대로 사기를 저지름",
-            present_stair="진행 중",
+            present_stair="증거 수집 중",
             doc_file_path="/cases/12345",
             case_occur_location="서울",
-            case_occur_date=Date(2025, 1, 1),
-            commission_period="2025-01-01 ~ 2025-01-31",
-            commission_date="2025-01-01",
+            case_occur_date=DateTime(2025, 1, 1),
+            commission_agency="춘천지방검찰청",
+            commission_date=DateTime(2025, 1, 31),
             related_person_info="A, B"
         )
         print("생성된 Case ID:", case.id)
@@ -703,12 +705,12 @@ def test_all_tables(delete: bool):
         case_number=12345,
         case_type="사기 범죄",
         case_overview="A가 B를 상대로 사기를 저지름",
-        present_stair="진행 중",
+        present_stair="증거 수집 중",
         doc_file_path="/cases/12345",
         case_occur_location="서울",
-        case_occur_date=date(2024, 1, 1),
-        commission_period="2025-01-01 ~ 2025-01-31",
-        commission_date="2025-01-01",
+        case_occur_date=DateTime(2024, 1, 1),
+        commission_agency="춘천지방검찰청",
+        commission_date=DateTime(2024, 1, 31),
         related_person_info="A, B"
     )
     evidence = createEvidence(

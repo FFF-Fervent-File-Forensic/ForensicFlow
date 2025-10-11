@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List
-from datetime import date
+from datetime import datetime, date
 import hashlib
 import backend
 
@@ -18,15 +18,15 @@ app.add_middleware(
 )
 
 class CaseCreate(BaseModel):
-    case_number: int
+    case_number: str
     case_type: str
     case_overview: str
     present_stair: str
     doc_file_path: str
     case_occur_location: str
-    case_occur_date: date
-    commission_period: str
-    commission_date: str
+    case_occur_date: datetime
+    commission_agency: str
+    commission_date: datetime
     related_person_info: str
 
 class EvidenceCreate(BaseModel):
