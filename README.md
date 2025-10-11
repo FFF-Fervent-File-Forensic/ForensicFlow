@@ -37,6 +37,7 @@ npm install
 ```
 **개발 서버 실행**
 ```bash
-npm start
+cd frontend npm start
+cd ../backend uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
