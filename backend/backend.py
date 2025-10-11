@@ -18,16 +18,16 @@ Base = declarative_base()
 class CaseTable(Base):
     __tablename__ = "CaseTable"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    case_number = Column(Integer)
+    case_number = Column(String(100))
     case_type = Column(String(100))
-    case_overview = Column(String(255))
+    case_overview = Column(String(1000))
     present_stair = Column(String(100))
     doc_file_path = Column(String(255))
     case_occur_location = Column(String(255))
     case_occur_date = Column(DateTime)
     commission_agency = Column(String(100))
     commission_date = Column(DateTime)
-    related_person_info = Column(String(255))
+    related_person_info = Column(String(1000))
 
     evidences = relationship("Evidence", back_populates="case", cascade="all, delete")
     members = relationship("MemberCase", back_populates="case", cascade="all, delete")
@@ -127,7 +127,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Case의 데이터를 매개변수로 받고 CaseTable 테이블에 데이터 추가
 def createCase(
-    case_number: int,
+    case_number: str,
     case_type: str,
     case_overview: str,
     present_stair: str,

@@ -18,7 +18,7 @@ app.add_middleware(
 )
 
 class CaseCreate(BaseModel):
-    case_number: int
+    case_number: str
     case_type: str
     case_overview: str
     present_stair: str
