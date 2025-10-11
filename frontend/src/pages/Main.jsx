@@ -59,7 +59,8 @@ function Main() {
         const caseData = await Promise.all(casePromises);
 
         const mapped = caseData.map(c => ({
-          id: c.case_number?.toString() || `Case-${c.id}`,
+        caseId: c.id, // DB 기본키
+        caseNumber: c.case_number, // 사건 번호
           progress: c.present_stair || '증거 수집 중',
           progressPercent:
             c.present_stair === '분석 완료' ? 100 :
@@ -161,7 +162,7 @@ function Main() {
 
   const filteredCaseList = useMemo(() => {
     return caseList.filter(c => {
-      const matchesSearch = c.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = c.caseNumber.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStage = filterStage === '전체' || c.progress === filterStage;
       return matchesSearch && matchesStage;
     });
@@ -213,12 +214,12 @@ function Main() {
           filteredCaseList.map((c) => (
             <div
               className={styles.caseCard}
-              key={c.id}
-              onClick={() => navigate("/register")}
+              key={c.caseId}
+              onClick={() => navigate(`/caseinfo/${c.caseId}`)}
               style={{ cursor: 'pointer' }}
             >
               <div className={styles.folderIcon}>📁</div>
-              <div className={styles.caseId}>{c.id}</div>
+              <div className={styles.caseId}>{c.caseNumber}</div>
               <div className={styles.progress}>{c.progress}</div>
               <div className={styles.progressBar}>
                 <div
