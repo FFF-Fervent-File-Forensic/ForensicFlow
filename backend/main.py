@@ -1,12 +1,21 @@
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from pydantic import BaseModel
+from datetime import datetime
+from pathlib import Path
+import uuid
+import shutil
 from typing import List
 from datetime import datetime, date
 import hashlib
 import backend
 
 app = FastAPI()
+
+# 1) 업로드 루트 절대경로 + 폴더 미리 생성
+UPLOAD_BASE = Path(os.environ.get("UPLOAD_BASE", "uploads")).resolve()
+UPLOAD_BASE.mkdir(parents=True, exist_ok=True)
 
 # CORS 설정
 app.add_middleware(
@@ -88,6 +97,11 @@ class LoginRequest(BaseModel):
     login_email: str
     login_password: str
 
+class UpdateMemberCaseRequest(BaseModel):
+    member_id: int
+    case_id: int
+    authority: str
+
 @app.post("/hashfile")
 def hash_file(file: UploadFile = File(...)):
     sha256 = hashlib.sha256()
@@ -106,8 +120,8 @@ def create_case(case: CaseCreate):
 @app.get("/getCaseList")
 def get_case_list():
     try:
-        ids = backend.getCaseList()
-        return {"ids": ids}
+        cases = backend.getCaseList()
+        return {"cases": cases}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -215,12 +229,71 @@ def delete_transfer_info(transfer_id: int):
 # == AnalysisInformation 엔드포인트 ==
 # ===============================
 
-@app.post("/createAnalysis")
-def create_analysis(analysis: AnalysisCreate):
+@app.post("/createAnalysis", status_code=201)
+async def create_analysis(
+    request: Request,
+    analysis_location: str = Form(...),
+    analysis_manager: str = Form(...),
+    analysis_tool: str = Form(...),
+    analysis_list: str = Form(...),
+    analysis_process: str = Form(...),
+    analysis_result: str = Form(...),
+    a_hash_validation_status: bool = Form(...),
+    complete_status: bool = Form(...),
+    evidence_id: int = Form(...),
+    file: UploadFile | None = File(None)   # 옵션 파일
+):
     try:
-        new_analysis = backend.createAnalysisInfo(**analysis.dict())
-        return new_analysis.__dict__
+        # 2) 요청 Content-Type 확인 (multipart인지)
+        ct = request.headers.get("content-type")
+        print(f"[REQ] Content-Type = {ct}")
+
+        save_path_str = ""
+
+        # 3) 파일 저장은 file이 있고 filename이 있을 때만
+        if file is not None and file.filename:
+            save_dir = UPLOAD_BASE
+            save_dir.mkdir(parents=True, exist_ok=True)
+
+            suffix = Path(file.filename).suffix
+            safe_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex}{suffix}"
+            save_path = (save_dir / safe_name).resolve()
+
+            print(f"[SAVE] Trying to save: {save_path}")
+            # 보안: 업로드 루트 밖으로 벗어나는 경로 방지
+            if UPLOAD_BASE not in save_path.parents:
+                raise HTTPException(status_code=400, detail="Invalid upload path")
+
+            # 스트림을 파일로 복사
+            with save_path.open("wb") as out:
+                shutil.copyfileobj(file.file, out)
+
+            save_path_str = str(Path("uploads") / save_path.name).replace(os.sep, "/")
+            print(f"[SAVE] Saved OK at: {save_path_str}")
+        else:
+            print("[SAVE] No file provided; skip saving file.")
+
+        new_analysis = backend.createAnalysisInfo(
+            analysis_location=analysis_location,
+            analysis_manager=analysis_manager,
+            analysis_tool=analysis_tool,
+            analysis_list=analysis_list,
+            analysis_process=analysis_process,
+            analysis_result=analysis_result,
+            analysis_filt_path=save_path_str,  # 파일 없으면 ""
+            a_hash_validation_status=a_hash_validation_status,
+            complete_status=complete_status,
+            evidence_id=evidence_id
+        )
+
+        data = new_analysis.__dict__.copy()
+        data.pop("_sa_instance_state", None)
+        return data
+
     except Exception as e:
+        # 에러 상태에서 원인 파악 쉽게
+        import traceback
+        print("[ERROR] create_analysis failed:\n", traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/getAnalysisInfoList/{evidence_id}")
@@ -266,8 +339,8 @@ def create_member(member: MemberCreate):
 @app.get("/getMemberList")
 def get_member_list():
     try:
-        ids = backend.getMemberList()
-        return {"ids": ids}
+        members = backend.getMemberList()
+        return {"members": members}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -330,11 +403,12 @@ def get_cases_by_member(member_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/getMembersByCase/{case_id}")
-def get_members_by_case(case_id: int):
+def get_members_by_case(case_id: int) -> dict[str, List[dict]]:
     try:
-        ids = backend.getMembersByCase(case_id)
-        return {"ids": ids}
+        result = backend.getMembersByCase(case_id)
+        return {"memberCases": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -358,3 +432,21 @@ def delete_member_case(member_id: int, case_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/updateMemberCase")
+def update_member_case_api(req: UpdateMemberCaseRequest):
+    try:
+        mc = backend.update_member_case(req.member_id, req.case_id, req.authority)
+        if not mc:
+            raise HTTPException(status_code=404, detail="해당 MemberCase가 존재하지 않습니다.")
+        return {
+            "id": mc.id,
+            "member_id": mc.member_id,
+            "case_id": mc.case_id,
+            "authority": mc.authority
+        }
+    except ValueError as ve:
+        # backend에서 ValueError 발생 시 404로 반환
+        raise HTTPException(status_code=404, detail=str(ve))
+    except Exception as e:
+        print(f"[ERROR] update_member_case_api: {e}")
+        raise HTTPException(status_code=500, detail="권한 수정 중 서버 오류 발생")

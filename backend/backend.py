@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, create_engine, ForeignKey, Date, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, create_engine, ForeignKey, Date, DateTime, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship, Session
+from typing import List, Dict
 from datetime import datetime, date
 import random
 
@@ -115,6 +116,10 @@ class MemberCase(Base):
     member = relationship("Member", back_populates="member_cases")
     case = relationship("CaseTable", back_populates="members")
 
+    __table_args__ = (
+        UniqueConstraint("member_id", "case_id", name="uq_member_case"),
+    )
+
 # 세션 생성
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -160,11 +165,19 @@ def createCase(
         db.close()
 
 # Case의 id(기본 키)들을 리스트로 반환
-def getCaseList() -> list[int]:
-    db = SessionLocal()
+def getCaseList() -> List[Dict]:
+    db: Session = SessionLocal()
     try:
-        case_ids = db.query(CaseTable.id).all()
-        return [cid[0] for cid in case_ids]
+        rows = db.query(CaseTable.id, CaseTable.case_number, CaseTable.present_stair).all()
+        # rows: list of tuples (id, case_number, present_stair)
+        return [
+            {
+                "id": r[0],
+                "case_number": r[1],
+                "present_stair": r[2]
+            }
+            for r in rows
+        ]
     finally:
         db.close()
 
@@ -542,13 +555,18 @@ def createMember(
     finally:
         db.close()
 
-
-# Member 테이블에 존재하는 모든 id 리스트 반환
-def getMemberList() -> list[int]:
+# Member 테이블에 존재하는 모든 id,이름 리스트 반환
+def getMemberList() -> List[Dict]:
     db = SessionLocal()
     try:
-        members = db.query(Member).all()
-        return [m.id for m in members]
+        rows = db.query(Member.id, Member.member_name).all()
+        return [
+            {
+                "id": r[0],
+                "member_name": r[1],
+            }
+            for r in rows
+        ]
     finally:
         db.close()
 
@@ -629,11 +647,19 @@ def getCasesByMember(member_id: int) -> list[int]:
         db.close()
 
 # 특정 Case에 접근 권한이 있는 Member ID 리스트
-def getMembersByCase(case_id: int) -> list[int]:
+def getMembersByCase(case_id: int) -> list[dict]:
     db = SessionLocal()
     try:
         entries = db.query(MemberCase).filter(MemberCase.case_id == case_id).all()
-        return [e.member_id for e in entries]
+        result = []
+        for e in entries:
+            result.append({
+                "mc_id": e.id,
+                "member_id": e.member.id,
+                "member_name": e.member.member_name,
+                "authority": e.authority
+            })
+        return result
     finally:
         db.close()
 
@@ -666,6 +692,20 @@ def deleteMemberCase(member_id: int, case_id: int) -> bool:
     finally:
         db.close()
 
+def update_member_case(member_id: int, case_id: int, authority: str) -> MemberCase:
+    db = SessionLocal()
+    mc = db.query(MemberCase).filter(
+        MemberCase.member_id == member_id,
+        MemberCase.case_id == case_id
+    ).first()
+
+    if not mc:
+        raise ValueError("해당 MemberCase가 존재하지 않습니다.")
+
+    mc.authority = authority
+    db.commit()
+    db.refresh(mc)
+    return mc
 
 # 테스트용 코드
 
