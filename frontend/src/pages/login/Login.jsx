@@ -27,8 +27,15 @@ function Login() {
             if (response.ok) {
                 const data = await response.json();
                 console.log("로그인 성공:", data);
-                localStorage.setItem("member_id", data.member_id);
-                localStorage.setItem("member_name", data.member_name);
+
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify({
+                    member_id: data.member_id,
+                    member_name: data.member_name,
+                    })
+                );
+
                 navigate("/main");
             } else {
                 const errorData = await response.json();

@@ -8,12 +8,11 @@ function Main() {
   const [showModal, setShowModal] = useState(false);
   const [showLegalUploadModal, setShowLegalUploadModal] = useState(false);
   const [legalFile, setLegalFile] = useState(null);
-  
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStage, setFilterStage] = useState('전체');
-
   const navigate = useNavigate();
   const { addCaseInfo } = useEvidence();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     caseNumber: '',
@@ -34,61 +33,125 @@ function Main() {
     { stage: '분석 완료', percent: 100 },
   ];
 
-  const filteredCaseList = useMemo(() => {
-    return caseList.filter(c => {
-      const matchesSearch = c.id.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStage = filterStage === '전체' || c.progress === filterStage;
+  // 로그인 안 되어 있으면 접근 차단
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) navigate('/');
+  }, [navigate]);
 
-      return matchesSearch && matchesStage;
-    });
-  }, [caseList, searchTerm, filterStage]);
+  // 로그인 회원 사건 목록 불러오기
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) return;
+
+    const loadCases = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/getCasesByMember/${user.member_id}`);
+        const data = await res.json();
+        const ids = data.ids || [];
+
+        if (ids.length === 0) {
+          setCaseList([]);
+          return;
+        }
+
+        const casePromises = ids.map(id => fetch(`http://localhost:8000/getCase/${id}`).then(r => r.json()));
+        const caseData = await Promise.all(casePromises);
+
+        const mapped = caseData.map(c => ({
+          id: c.case_number?.toString() || `Case-${c.id}`,
+          progress: c.present_stair || '증거 수집 중',
+          progressPercent:
+            c.present_stair === '분석 완료' ? 100 :
+            c.present_stair === '증거 분석 중' ? 66 :
+            c.present_stair === '증거 이송 중' ? 33 : 0,
+        }));
+
+        setCaseList(mapped);
+      } catch (err) {
+        console.error('사건 목록 불러오기 실패:', err);
+      }
+    };
+
+    loadCases();
+  }, []);
+
+  // 로그아웃
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate('/');
+  };
+
+  // 사건 등록
+  const handleAddCase = async () => {
+    if (isSubmitting) return; // 중복 방지
+    setIsSubmitting(true);
+
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) return;
+
+    const caseBody = {
+      case_number: formData.caseNumber,
+      case_type: formData.caseType,
+      case_overview: formData.summary,
+      present_stair: "증거 수집 중",
+      doc_file_path: legalFile ? legalFile.name : "",
+      case_occur_location: formData.location,
+      case_occur_date: formData.incidentDateTime || null,
+      commission_agency: formData.agency,
+      commission_date: formData.requestDateTime || null,
+      related_person_info: formData.persons,
+    };
+
+    try {
+      const res = await fetch('http://localhost:8000/createCase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(caseBody),
+      });
+      if (!res.ok) throw new Error('Case creation failed');
+      const newCase = await res.json();
+
+      const mcRes = await fetch('http://localhost:8000/createMemberCase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          member_id: user.member_id,
+          case_id: newCase.id,
+          authority: '등록자',
+        }),
+      });
+      if (!mcRes.ok) throw new Error('MemberCase link failed');
+
+      setCaseList(prev => [
+        ...prev,
+        { id: formData.caseNumber, progress: '증거 수집 중', progressPercent: 0 },
+      ]);
+
+      setShowModal(false);
+      setFormData({
+        caseNumber: '',
+        caseType: '',
+        incidentDateTime: '',
+        location: '',
+        summary: '',
+        persons: '',
+        agency: '',
+        requestDateTime: '',
+        legalPower: false,
+      });
+      setLegalFile(null);
+    } catch (err) {
+      console.error(err);
+      alert('사건 등록 실패');
+    } finally {
+    setIsSubmitting(false);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value,
-    });
-  };
-
-  const handleAddCase = () => {
-    if (caseList.some(c => c.id === formData.caseNumber)) {
-      alert("이미 등록된 사건 번호입니다.");
-      return;
-    }
-
-    const newCase = {
-      id: formData.caseNumber,
-      progress: progressStages[0].stage,
-      progressPercent: progressStages[0].percent,
-      ...formData,
-    };
-
-    // EvidenceContext에 저장
-    addCaseInfo({
-      ...formData,
-      legalFile: legalFile,
-    });
-
-    setCaseList([...caseList, {
-      id: newCase.id,
-      progress: newCase.progress,
-      progressPercent: newCase.progressPercent,
-    }]);
-
-    setFormData({
-      caseNumber: '',
-      caseType: '',
-      incidentDateTime: '',
-      location: '',
-      summary: '',
-      persons: '',
-      agency: '',
-      requestDateTime: '',
-      legalPower: false,
-    });
-    setLegalFile(null);
-    setShowModal(false);
+    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
   };
 
   const handleRemoveLegalFile = () => {
@@ -96,34 +159,13 @@ function Main() {
     setFormData({ ...formData, legalPower: false });
   };
 
-  // 필터링 기능 테스트 더미데이터 추가
-    useEffect(() => {
-    setCaseList(prev => {
-      let initialList = [...prev];
-      if (!initialList.some(c => c.id === 'DF-2025-0413-001')) {
-        initialList.push({
-          id: 'DF-2025-0413-001',
-          progress: '증거 수집 중',
-          progressPercent: 10,
-        });
-      }
-      if (!initialList.some(c => c.id === 'AB-2025-0501-002')) {
-        initialList.push({
-            id: 'AB-2025-0501-002',
-            progress: '분석 완료',
-            progressPercent: 100,
-        });
-      }
-      if (!initialList.some(c => c.id === 'XY-2025-0610-003')) {
-        initialList.push({
-            id: 'XY-2025-0610-003',
-            progress: '증거 이송 중',
-            progressPercent: 45,
-        });
-      }
-      return initialList;
+  const filteredCaseList = useMemo(() => {
+    return caseList.filter(c => {
+      const matchesSearch = c.id.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStage = filterStage === '전체' || c.progress === filterStage;
+      return matchesSearch && matchesStage;
     });
-  }, []);
+  }, [caseList, searchTerm, filterStage]);
 
   return (
     <div className={styles.mainContainer}>
@@ -148,11 +190,11 @@ function Main() {
         <button className={styles.registerButton} onClick={() => setShowModal(true)}>
           ⊕ 사건 등록
         </button>
-        <button className={styles.logoutButton} onClick={() => navigate("/")}>
+        <button className={styles.logoutButton} onClick={handleLogout}>
           로그아웃
         </button>
       </div>
-      
+
       <div className={styles.caseList}>
         {filteredCaseList.length === 0 ? (
           <div className={styles.emptyMessage}>
@@ -284,31 +326,38 @@ function Main() {
                 </div>
               </div>
               <div className={`${styles.formRow} ${styles.alignCenter}`}>
-                <label className={styles.checkbox} onClick={() => setShowLegalUploadModal(true)}>
-                  <input
-                    type="checkbox"
-                    name="legalPower"
-                    checked={formData.legalPower}
-                    readOnly
-                  />
-                  <div className={styles.checkboxTextGroup}>
-                    <div className={styles.mainLabel}>법적 권한</div>
-                    <div className={styles.subtext}>압수수색영장, 피고인 사실확인서 등</div>
-                  </div>
-                </label>
-                {formData.legalPower && legalFile && (
-                  <div className={styles.uploadedFile}>
-                    {legalFile.name}
-                    <button className={styles.removeFileButton} onClick={handleRemoveLegalFile}>✖</button>
-                  </div>
-                )}
+                  <label className={styles.checkbox} onClick={() => setShowLegalUploadModal(true)}>
+                    <input
+                      type="checkbox"
+                      name="legalPower"
+                      checked={formData.legalPower}
+                      readOnly
+                    />
+                    <div className={styles.checkboxTextGroup}>
+                      <div className={styles.mainLabel}>법적 권한</div>
+                      <div className={styles.subtext}>압수수색영장, 피고인 사실확인서 등</div>
+                    </div>
+                  </label>
+
+                  {formData.legalPower && legalFile && (
+                    <div className={styles.uploadedFile}>
+                      {legalFile.name}
+                      <button
+                        type="button"
+                        className={styles.removeFileButton}
+                        onClick={handleRemoveLegalFile}
+                      >
+                        ✖
+                      </button>
+                    </div>
+                  )}
                 <button
                   className={styles.addButton}
                   type="submit"
                   disabled={!formData.caseNumber}
                   style={{
-                    backgroundColor: formData.caseNumber ? '#007aff' : '#ddd',
-                    cursor: formData.caseNumber ? 'pointer' : 'default',
+                    backgroundColor: formData.caseNumber && !isSubmitting ? '#007aff' : '#ddd',
+                    cursor: formData.caseNumber && !isSubmitting ? 'pointer' : 'default',
                   }}
                 >
                   추가
