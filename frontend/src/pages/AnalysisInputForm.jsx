@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useEvidence } from "../contexts/EvidenceContext";
+import React, { useState, useEffect, useRef, use } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import styles from "../styles/AnalysisInputForm.module.css";
 
 import HashVerifierFooter from '../components/HashVerifierFooter';
@@ -8,6 +7,7 @@ import HashVerifierFooter from '../components/HashVerifierFooter';
 const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8000";
 
 async function postCreateAnalysisMultipart({ form, file, evidenceId }) {
+
   const fd = new FormData();
 
   fd.append("analysis_location", form.location);
@@ -40,6 +40,24 @@ async function postCreateAnalysisMultipart({ form, file, evidenceId }) {
 }
 
 export default function AnalysisInputForm() {
+  
+  const { caseId, evidenceId } = useParams();
+  const [ currentEvidence, setCurrentEvidence ] = useState(null);
+
+  useEffect(async () => {
+    async function fetchCurrentEvidence() {
+      const res = await fetch(`${API_BASE}/getEvidence/${evidenceId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setCurrentEvidence(data);
+      } else {
+        console.error("증거 정보 로드 실패:", res.status);
+      }
+    }
+    if (evidenceId) fetchCurrentEvidence();
+  }, [evidenceId]);
+
+
   const [form, setForm] = useState({
     location: "",
     analyst: "",
@@ -54,20 +72,7 @@ export default function AnalysisInputForm() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [isReportUploaded, setIsReportUploaded] = useState(false);
   const fileInputRef = useRef(null);
-
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const evidenceNameFromState = location.state?.evidenceName;
-  const { evidenceInfo, addAnalysisInfo } = useEvidence();
-  const [currentEvidence, setCurrentEvidence] = useState(null);
-
-  useEffect(() => {
-    if (evidenceNameFromState && evidenceInfo) {
-      const foundEvidence = evidenceInfo.find(ev => ev.name === evidenceNameFromState);
-      setCurrentEvidence(foundEvidence);
-    }
-  }, [evidenceNameFromState, evidenceInfo]);
 
   const isComplete = isReportUploaded
     ? form.analyst.trim() !== ""
@@ -95,7 +100,7 @@ const onHashValid = async () => {
   console.log("해시 검증 성공! (옵션) 파일 업로드 + DB 저장 요청 시작.");
 
   try {
-    const evidenceId = Number(currentEvidence?.id ?? 1);
+    const evidenceId = Number(evidenceId);
 
     // 파일 없으면 그냥 파일 없이 전송됨
     const created = await postCreateAnalysisMultipart({
@@ -105,10 +110,6 @@ const onHashValid = async () => {
     });
 
     console.log("백엔드 저장 완료:", created);
-
-    if (currentEvidence) {
-      addAnalysisInfo(currentEvidence.name, form);
-    }
 
     setShowModal(false);
     navigate("/analyze");
@@ -166,20 +167,12 @@ const onHashValid = async () => {
     }
   };
 
-
-  if (!currentEvidence && evidenceNameFromState) {
-    return <div>Loading evidence data or invalid evidence selected...</div>;
-  }
-  if (!evidenceNameFromState) {
-    return <div>No evidence selected. Please go back to the analyze page.</div>;
-  }
-
   return (
     <div className={styles.inputFormContainer}>
       <div className={styles.inputGrid}>
         <div className={styles.labelGroup}>
           <label>분석 대상:</label>
-          <span>{currentEvidence?.name || "-"}</span>
+          <span>{currentEvidence?.evidence_name || "-"}</span>
         </div>
         <div className={styles.labelGroup}>
           <label>증거 종류:</label>
@@ -245,7 +238,7 @@ const onHashValid = async () => {
           <div className={styles.hashModalContent}>
             <p className={styles.uploadTitle}>해시 검증</p>
             <HashVerifierFooter
-              storedHash={currentEvidence?.hash || ""}
+              storedHash={currentEvidence.hash_value || ""}
               onValid={onHashValid}
               onInvalid={onHashInvalid}
               disabled={false}
@@ -268,7 +261,7 @@ const onHashValid = async () => {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     style={{ cursor: isReportUploaded ? 'not-allowed' : 'pointer' }}
-                >
+                >Hash
                     <input
                         type="file"
                         onChange={handleFileChange}

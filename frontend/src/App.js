@@ -32,12 +32,12 @@ function App() {
           <Route path="/main" element={<Main />} />
 
           <Route element={<Layout />}>
-            <Route path="/analyze" element={<Analyze />} />
-            <Route path="/analyzeinput" element={<Analyzeinput />} />
+            <Route path="/analyze/:caseId" element={<Analyze />} />
+            <Route path="/analyzeinput/:caseId/:evidenceId" element={<Analyzeinput />} />
             <Route path="/reportPage" element={<ReportPage />} />
             <Route path="/register" element={<DataRegister />} />
             <Route path="/transfer" element={<DataTransfer />} />
-            <Route path="/admin" element={<CaseAdmin />} />
+            <Route path="/admin/:caseId" element={<CaseAdmin />} />
             <Route path="/caseinfo/:caseId" element={<CaseInfo />} />
 
           </Route>
