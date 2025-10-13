@@ -117,6 +117,59 @@ def create_case(case: CaseCreate):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# =====================
+# == Report 엔드포인트 ==
+# =====================
+
+@app.get("/report/{case_id}")
+def get_report(case_id: int):
+    try:
+        # 사건 정보 조회
+        case = backend.getCase(case_id)
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+
+        # 증거 목록 조회
+        evidence_ids = backend.getEvidenceList(case_id)
+        evidences: list[dict] = []
+
+        for evidence_id in evidence_ids:
+            evidence = backend.getEvidence(evidence_id)
+            if not evidence:
+                # 존재하지 않으면 스킵
+                continue
+
+            # 이송 정보
+            transfer_ids = backend.getTransferInfoList(evidence_id)
+            transfers = []
+            for tid in transfer_ids:
+                data = backend.getTransferInfo(tid)
+                if data:
+                    transfers.append(data)
+
+            # 분석 정보
+            analysis_ids = backend.getAnalysisInfoList(evidence_id)
+            analyses = []
+            for aid in analysis_ids:
+                data = backend.getAnalysisInfo(aid)
+                if data:
+                    analyses.append(data)
+
+            ev = evidence.copy()
+            ev["transfer_info"] = transfers
+            ev["analysis_info"] = analyses
+            evidences.append(ev)
+
+        return {
+            "case": case,
+            "evidences": evidences
+        }
+    except HTTPException:
+        # 그대로 전파
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/getCaseList")
 def get_case_list():
     try:
