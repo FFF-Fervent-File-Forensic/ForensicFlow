@@ -58,10 +58,6 @@ export default function DataTransfer() {
 
         for (const id of EList) {
           const response = await fetch(`http://localhost:8000/getEvidence/${id}`);
-          if (!response.ok) {
-            console.warn(`증거 ID ${id}의 데이터를 불러오는 데 실패했습니다.`);
-            continue;
-          }
           const result = await response.json();
           fetchedEvidence.push({
             id,
@@ -70,26 +66,34 @@ export default function DataTransfer() {
             date: result.collect_date,
           });
 
-          // transferInfo 존재 여부 확인
+          // TransferInfo 가져오기
           const tRes = await fetch(`http://localhost:8000/getTransferInfoList/${id}`);
-          const tResult = await tRes.json();
+          const tList = await tRes.json();
+          let transferStatus = "pending";
+          let hashStatus = "disabled";
+          let transferData = null;
 
-          if (tResult.ids && tResult.ids.length > 0) {
-            rowStatesWithTransfer.push({
-              transfer: "정보 기입 완료",
-              transferStatus: "done",
-              hashStatus: "none", // 해시 검증 버튼 활성화
-              transferData: tResult.data || null,
-            });
-          } else {
-            rowStatesWithTransfer.push({
-              transfer: "이송 정보 기입",
-              transferStatus: "pending",
-              hashStatus: "disabled", // 해시 검증 비활성화
-              transferData: null,
-            });
+          if (tList.ids && tList.ids.length > 0) {
+            // TransferInfo 상세 데이터 가져오기 (t_hash_validation_status 포함)
+            const tInfoRes = await fetch(`http://localhost:8000/getTransferInfo/${tList.ids[0]}`);
+            const tInfo = await tInfoRes.json();
+            transferData = tInfo;
+            transferStatus = "done";
+            hashStatus = tInfo.t_hash_validation_status ? "done" : "none"; // 버튼 활성화 여부 결정
+
+            // 디버깅용 콘솔 출력
+            console.log(`[DEBUG] Evidence ID: ${id}, t_hash_validation_status:`, tInfo.t_hash_validation_status);
           }
+
+          rowStatesWithTransfer.push({
+            transfer: transferStatus === "done" ? "정보 기입 완료" : "이송 정보 기입",
+            transferStatus,
+            hashStatus,
+            transferData,
+          });
         }
+
+
 
         setEvidenceInfo(fetchedEvidence);
         setRowStates(rowStatesWithTransfer);
@@ -103,6 +107,7 @@ export default function DataTransfer() {
 
     fetchEvidenceData();
   }, []);
+
 
   // --------------------------
   // 모달 및 폼 관련 함수
@@ -143,6 +148,9 @@ export default function DataTransfer() {
     );
   };
 
+  // --------------------------
+  // handleRegister 수정 — Transfer 생성 시 해시 버튼 활성화
+  // --------------------------
   const handleRegister = async () => {
     if (!isFormValid()) {
       alert("모든 필드를 입력해야 합니다.");
@@ -191,7 +199,7 @@ export default function DataTransfer() {
 
       alert("이송 정보가 성공적으로 등록되었습니다.");
 
-      // rowStates 업데이트: transfer 완료 + hash 버튼 활성화
+      // rowStates 업데이트
       setRowStates((states) =>
         states.map((item, i) =>
           i === modalIdx
@@ -199,7 +207,7 @@ export default function DataTransfer() {
                 ...item,
                 transfer: "정보 기입 완료",
                 transferStatus: "done",
-                hashStatus: "none", // hash 버튼 활성화
+                hashStatus: "none",
                 transferData,
               }
             : item
@@ -214,21 +222,8 @@ export default function DataTransfer() {
   };
 
   // --------------------------
-  // 해시 검증 관련
+  // 해시 검증 기능
   // --------------------------
-  const onHashValid = () => {
-    setRowStates((states) =>
-      states.map((item, i) =>
-        i === hashModalIdx ? { ...item, hashStatus: 'done' } : item
-      )
-    );
-    setHashModalIdx(null);
-  };
-
-  const onHashInvalid = () => {
-    alert('해시가 일치하지 않습니다!');
-  };
-
   const openHashModal = (idx) => {
     setHashModalIdx(idx);
     document.body.style.overflow = 'hidden';
@@ -237,6 +232,56 @@ export default function DataTransfer() {
   const closeHashModal = () => {
     setHashModalIdx(null);
     document.body.style.overflow = 'auto';
+  };
+
+  const handleHashVerify = async (file) => {
+    try {
+      const evidence = evidenceInfo[hashModalIdx];
+      if (!evidence) {
+        alert("해당 증거 정보를 찾을 수 없습니다.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("evidence_id", evidence.id);
+
+      const verifyRes = await fetch("http://localhost:8000/verifyEvidenceHash", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!verifyRes.ok) throw new Error("해시 검증 요청 실패");
+      const isSame = await verifyRes.json();
+
+      if (isSame === true) {
+        alert("✅ 해시 검증 완료!");
+
+        const transferData = rowStates[hashModalIdx]?.transferData;
+        if (transferData && transferData.id) {
+          await fetch(`http://localhost:8000/toggleTransferHash/${transferData.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ value: true })
+          });
+        }
+
+
+        setRowStates((states) =>
+          states.map((item, i) =>
+            i === hashModalIdx ? { ...item, hashStatus: "done" } : item
+          )
+        );
+
+        closeHashModal();
+      } else {
+        alert("❌ 해시가 일치하지 않습니다!");
+        closeHashModal();
+      }
+    } catch (err) {
+      console.error(err);
+      alert("해시 검증 중 오류가 발생했습니다.");
+    }
   };
 
   const isAllDone = rowStates.every(
@@ -258,91 +303,29 @@ export default function DataTransfer() {
 
   return (
     <div className={styles.dtContainer}>
-      {/* 이송 정보 입력 모달 */}
-      {modalIdx !== null && (
-        <div className={styles.transferModalOverlay}>
-          <div className={styles.transferModalBackdrop} />
-          <div className={styles.transferModalContent}>
-            <p className={styles.uploadTitle}>이송 정보 입력</p>
-            <div className={styles.fileInfoForm}>
-              <p><strong>파일명:</strong> {evidenceInfo[modalIdx]?.name}</p>
-              <div className={styles.inputRow}>
-                <label className={styles.inputLabel}>출발 위치</label>
-                <input className={styles.inputField} value={form.출발위치} onChange={e => handleFormChange('출발위치', e.target.value)} />
-              </div>
-              <div className={styles.inputRow}>
-                <label className={styles.inputLabel}>도착 위치</label>
-                <input className={styles.inputField} value={form.도착위치} onChange={e => handleFormChange('도착위치', e.target.value)} />
-              </div>
-              <div className={styles.formRow}>
-                <div className={styles.inputRow}>
-                  <label className={styles.inputLabel}>이송 일시</label>
-                  <input type="datetime-local" className={styles.inputField} value={form.이송일시} onChange={e => handleFormChange('이송일시', e.target.value)} />
-                </div>
-                <div className={styles.inputRow}>
-                  <label className={styles.inputLabel}>도착 일시</label>
-                  <input type="datetime-local" className={styles.inputField} value={form.도착일시} onChange={e => handleFormChange('도착일시', e.target.value)} />
-                </div>
-              </div>
-              {[['발신자', '발신자연락처'], ['이송자', '이송자연락처'], ['수령자', '수령자연락처']].map(([a, b]) => (
-                <div className={styles.formRow} key={a}>
-                  <div className={styles.inputRow}>
-                    <label className={styles.inputLabel}>{a}</label>
-                    <input className={styles.inputField} value={form[a]} onChange={e => handleFormChange(a, e.target.value)} />
-                  </div>
-                  <div className={styles.inputRow}>
-                    <label className={styles.inputLabel}>{b}</label>
-                    <input className={styles.inputField} value={form[b]} onChange={e => handleFormChange(b, e.target.value)} />
-                  </div>
-                </div>
-              ))}
-              <div className={styles.inputRowGap8}>
-                <label className={styles.inputLabel}>담당자</label>
-                <input className={styles.inputField} value={form.담당자} onChange={e => handleFormChange('담당자', e.target.value)} />
-                <button
-                  type="button"
-                  onClick={() => document.getElementById('signatureInput').click()}
-                  className={styles.signatureAttachButton}
-                >서명</button>
-                <input
-                  id="signatureInput"
-                  type="file"
-                  accept="image/*"
-                  className={styles.hiddenInput}
-                  onChange={e => {
-                    if (e.target.files[0]) {
-                      setSignatureFile(e.target.files[0]);
-                    }
-                  }}
-                />
-              </div>
-              {signatureFile && <div className={styles.signatureFileInfo}>첨부된 서명: {signatureFile.name}</div>}
-              <label className={styles.inputLabel}>이미지</label>
-              <input id="imgInput" type="file" accept="image/*" className={styles.hiddenInput} onChange={e => handleFormChange('이미지', e.target.files[0])} />
-              <div className={styles.fileDropTransferImage} onClick={() => document.getElementById('imgInput').click()}>
-                {form.이미지 ? form.이미지.name : '증거 사진을 업로드하세요.'}
-              </div>
-              <div className={styles.formButtons}>
-                <button onClick={closeModal}>취소</button>
-                <button onClick={handleRegister} disabled={!isFormValid()}>등록</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* 해시 검증 모달 */}
       {hashModalIdx !== null && (
         <div className={styles.hashModalOverlay}>
           <div className={styles.hashModalBackdrop} />
           <div className={styles.hashModalContent}>
             <p className={styles.uploadTitle}>해시 검증</p>
-            <HashVerifierFooter
-              storedHash={evidenceInfo[hashModalIdx]?.hash}
-              onValid={onHashValid}
-              onInvalid={onHashInvalid}
-              disabled={false}
+            <input
+              id="verifyFileInput"
+              type="file"
+              accept="*/*"
+              className={styles.hiddenInput}
+              onChange={(e) => {
+                if (e.target.files[0]) {
+                  handleHashVerify(e.target.files[0]);
+                }
+              }}
             />
+            <div
+              className={styles.fileDropTransferImage}
+              onClick={() => document.getElementById("verifyFileInput").click()}
+            >
+              해시 검증을 위해 파일을 업로드하세요.
+            </div>
             <div className={styles.formButtonsHashModal}>
               <button onClick={closeHashModal}>취소</button>
             </div>
@@ -350,7 +333,7 @@ export default function DataTransfer() {
         </div>
       )}
 
-      {/* DB에서 가져온 데이터로 테이블 생성 */}
+      {/* 메인 테이블 */}
       <table className={styles.dtTable}>
         <thead>
           <tr>
@@ -359,18 +342,19 @@ export default function DataTransfer() {
             <th>수집 일시</th>
             <th>이송 정보</th>
             <th>해시 검증</th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
           {evidenceInfo.map((item, idx) => (
-            <tr key={item.evidence_name || idx}>
+            <tr key={item.id}>
               <td>{item.name}</td>
               <td>{item.type}</td>
               <td>{item.date}</td>
               <td>
                 {rowStates[idx]?.transferStatus === 'done' ? (
-                  <span className={styles.dtStatusOk}><span className={styles.dtIconOk}>✔</span> {rowStates[idx]?.transfer}</span>
+                  <span className={styles.dtStatusOk}>
+                    <span className={styles.dtIconOk}>✔</span> {rowStates[idx]?.transfer}
+                  </span>
                 ) : (
                   <button className={styles.dtBtnBlue} onClick={() => openModal(idx)}>
                     {rowStates[idx]?.transfer}
@@ -379,18 +363,17 @@ export default function DataTransfer() {
               </td>
               <td>
                 {rowStates[idx]?.hashStatus === 'done' ? (
-                  <span className={styles.dtStatusOk}><span className={styles.dtIconOk}>✔</span></span>
+                  <span className={styles.dtStatusOk}>
+                    <span className={styles.dtIconOk}>✔</span>
+                  </span>
+                ) : rowStates[idx]?.hashStatus === 'none' ? (
+                  <button className={styles.dtBtnBlue} onClick={() => openHashModal(idx)}>
+                    해시 검증
+                  </button>
                 ) : (
-                  rowStates[idx]?.hashStatus !== 'disabled' ? (
-                    <button className={styles.dtBtnBlue} onClick={() => openHashModal(idx)}>
-                      해시 검증
-                    </button>
-                  ) : (
-                    <span className={styles.dtStatusFail}>✖</span>
-                  )
+                  <span className={styles.dtStatusFail}>✖</span>
                 )}
               </td>
-              <td></td>
             </tr>
           ))}
         </tbody>
