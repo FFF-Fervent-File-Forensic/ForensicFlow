@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Request
+from fastapi import FastAPI, HTTPException, File, UploadFile, Form, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
 import os
 from pydantic import BaseModel
@@ -185,6 +185,10 @@ def delete_evidence(evidence_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/verifyEvidenceHash")
+async def verify_evidence_hash(evidence_id: int = Form(...), file: UploadFile = File(...)):
+    return backend.isSameHash(evidence_id, file)
+
 # ===============================
 # == TransferInformation 엔드포인트 ==
 # ===============================
@@ -224,6 +228,15 @@ def delete_transfer_info(transfer_id: int):
         return {"success": True}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+class ToggleHashRequest(BaseModel):
+    value: bool
+
+# 특정 TransferInformation의 t_hash_validation_status 값을 True 또는 False로 변경
+@app.put("/toggleTransferHash/{transfer_id}")
+def toggle_transfer_hash(transfer_id: int, payload: dict = Body(...)):
+    success = backend.toggleTransformHash(transfer_id, payload["value"])
+    return {"success": success}
 
 # ===============================
 # == AnalysisInformation 엔드포인트 ==

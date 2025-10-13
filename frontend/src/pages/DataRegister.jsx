@@ -1,64 +1,200 @@
-import React, { useState, useEffect } from 'react';
-import styles from '../styles/DataRegister.module.css';
-import { useNavigate } from 'react-router-dom';
-
-// 개발 및 디버깅을 위한 하드 코딩. 추후 수정 필요
-const CURRENT_CASEID = 1;
-
-const response = await fetch(`http://localhost:8000/getEvidenceList/1`);
-const evidenceIDList = await response.json();
+import React, { useState, useEffect } from "react";
+import styles from "../styles/DataRegister.module.css";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function EvidenceManager() {
+  const { caseId } = useParams();
+  console.log("caseId", caseId);
+  const CURRENT_CASEID = Number(caseId);
+  console.log("CURRENT_CASEID", CURRENT_CASEID);
   const navigate = useNavigate();
 
-  // Evidence ID 리스트
-  const [EList, setEList] = useState(evidenceIDList.ids);
+  // -----------------------------
+  // 상태 정의
+  // -----------------------------
+  const [EList, setEList] = useState([]); // Evidence ID 목록
+  const [evidenceInfo, setEvidenceInfo] = useState([]); // 테이블 표시용 데이터
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태
 
-  // Evidence 데이터 목록
-  const [evidenceInfo, setEvidenceInfo] = useState([]);
+  // 신규 증거 등록 관련 상태
+  const [showUploadBox, setShowUploadBox] = useState(false);
+  const [showDataInputBox, setShowDataInputBox] = useState(false);
+  const [uploadedFileInfo, setUploadedFileInfo] = useState(null); // { filename, hash }
 
-  // 서버 응답 상태
-  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    responsible_member: "",
+    sign_file_path: "",
+    evidence_user: "",
+    type: "",
+    manufactory: "",
+    model_name: "",
+    collect_location: "",
+    store_location: "",
+    unique_number: "",
+    manufactory_date: "",
+    collect_date: "",
+  });
 
-  // 컴포넌트가 처음 렌더링될 때 DB에서 증거 데이터 불러오기
+  // -----------------------------
+  // Evidence 리스트 불러오기
+  // -----------------------------
+  useEffect(() => {
+    const fetchEvidenceList = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/getEvidenceList/${CURRENT_CASEID}`);
+        if (!res.ok) throw new Error("리스트 불러오기 실패");
+        const list = await res.json();
+        setEList(list.ids);
+      } catch (err) {
+        console.error("리스트 불러오기 오류:", err);
+      }
+    };
+    fetchEvidenceList();
+  }, []);
+
+  // -----------------------------
+  // Evidence 데이터 불러오기
+  // -----------------------------
   useEffect(() => {
     const fetchEvidenceData = async () => {
-      setIsLoading(true); // 서버 응답 대기 상태 시작
-
+      if (EList.length === 0) return;
+      setIsLoading(true);
       try {
         const results = [];
-
-        // EList의 각 ID에 대해 fetch 수행
         for (const id of EList) {
           const response = await fetch(`http://localhost:8000/getEvidence/${id}`);
-          if (!response.ok) {
-            throw new Error(`Failed to fetch evidence with id ${id}`);
-          }
-
+          if (!response.ok) throw new Error(`ID ${id} 불러오기 실패`);
           const result = await response.json();
-
-          // result에는 DB에서 반환한 Evidence 데이터가 들어 있음
           results.push({
             name: result.evidence_name,
             type: result.type,
             date: result.collect_date,
           });
         }
-
-        setEvidenceInfo(results); // evidenceTable 데이터 갱신
+        setEvidenceInfo(results);
       } catch (error) {
-        console.error("Error fetching evidence data:", error);
-        alert("서버로부터 데이터를 불러오는 중 오류가 발생했습니다.");
+        console.error("Evidence 데이터 불러오기 오류:", error);
+        alert("서버 통신 중 오류가 발생했습니다.");
       } finally {
-        setIsLoading(false); // 로딩 종료
+        setIsLoading(false);
       }
     };
 
     fetchEvidenceData();
   }, [EList]);
 
+  // -----------------------------
+  // 파일 업로드 처리
+  // -----------------------------
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("http://localhost:8000/hashfile", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("서버 응답 오류");
+      const data = await response.json();
+
+      console.log("서버로부터 받은 해시값:", data.sha256);
+      setUploadedFileInfo({
+        filename: file.name,
+        hash: data.sha256,
+      });
+
+      // 업로드 완료 → 파일 입력창 닫고 데이터 입력창 열기
+      setShowUploadBox(false);
+      setShowDataInputBox(true);
+    } catch (err) {
+      console.error("파일 업로드 중 오류:", err);
+      alert("파일 업로드 중 오류가 발생했습니다.");
+    }
+  };
+
+  // -----------------------------
+  // 폼 입력 처리
+  // -----------------------------
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // -----------------------------
+  // Evidence 생성 처리
+  // -----------------------------
+  const handleCreateEvidence = async () => {
+    const allFilled = Object.values(formData).every((v) => v !== "");
+    if (!allFilled || !uploadedFileInfo) {
+      alert("모든 입력을 완료해야 합니다.");
+      return;
+    }
+
+    const evidenceData = {
+      hash_value: uploadedFileInfo.hash,
+      evidence_name: uploadedFileInfo.filename,
+      responsible_member: formData.responsible_member,
+      type: formData.type,
+      evidence_user: formData.evidence_user,
+      model_name: formData.model_name,
+      collect_location: formData.collect_location,
+      store_location: formData.store_location,
+      unique_number: parseInt(formData.unique_number),
+      manufactory_date: formData.manufactory_date,
+      collect_date: formData.collect_date,
+      sign_file_path: formData.sign_file_path,
+      case_id: CURRENT_CASEID,
+    };
+
+    try {
+      const res = await fetch("http://localhost:8000/createEvidence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(evidenceData),
+      });
+
+      if (!res.ok) throw new Error("DB 등록 실패");
+
+      alert("신규 증거가 성공적으로 등록되었습니다.");
+      
+      
+      // 새 데이터 반영 위해 테이블 갱신
+      const newListRes = await fetch(`http://localhost:8000/getEvidenceList/${CURRENT_CASEID}`);
+      const newList = await newListRes.json();
+      setEList(newList.ids);
+
+      // 입력창 닫기
+      setShowDataInputBox(false);
+      setUploadedFileInfo(null);
+      setFormData({
+        responsible_member: "",
+        sign_file_path: "",
+        evidence_user: "",
+        type: "",
+        manufactory: "",
+        model_name: "",
+        collect_location: "",
+        store_location: "",
+        unique_number: "",
+        manufactory_date: "",
+        collect_date: "",
+      });
+    } catch (err) {
+      console.error("Evidence 등록 오류:", err);
+      alert("DB 저장 중 문제가 발생했습니다.");
+    }
+  };
+
+  // -----------------------------
+  // UI 렌더링
+  // -----------------------------
   return (
-    <div className={styles.container}>
+    <div className={styles.container} style={{ position: "relative" }}>
       <div className={styles.leftPane}>
         <table className={styles.evidenceTable}>
           <thead>
@@ -71,7 +207,7 @@ export default function EvidenceManager() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan="3" style={{ textAlign: 'center', color: '#888' }}>
+                <td colSpan="3" style={{ textAlign: "center", color: "#888" }}>
                   서버 응답 대기 중..
                 </td>
               </tr>
@@ -85,7 +221,7 @@ export default function EvidenceManager() {
               ))
             ) : (
               <tr>
-                <td colSpan="3" style={{ textAlign: 'center', color: '#aaa' }}>
+                <td colSpan="3" style={{ textAlign: "center", color: "#aaa" }}>
                   불러올 데이터가 없습니다.
                 </td>
               </tr>
@@ -97,11 +233,80 @@ export default function EvidenceManager() {
       <div className={styles.rightPane}>
         <button
           className={styles.addButton}
-          onClick={() => navigate('/transfer')}
+          onClick={() => navigate(`/transfer/${CURRENT_CASEID}`)}
         >
           다음 단계
         </button>
+
+        <button
+          className={styles.addEvidenceButton}
+          onClick={() => {
+            setShowUploadBox(true);
+          }}
+        >
+          신규 증거 등록
+        </button>
       </div>
+
+
+      {/* 업로드 박스 */}
+      {showUploadBox && (
+        <div className={styles.uploadBox}>
+          <div className={styles.uploadBox2}>
+            <div className={styles.fileDrop} onClick={() => document.getElementById('fileInput').click()}>
+                파일을 업로드하세요.
+                <input id="fileInput" type="file" style={{ display:'none'}} onChange={handleFileUpload} />
+              </div>
+            <br />
+            <button className={styles.cancelButton} onClick={() => setShowUploadBox(false)}>취소</button>
+          </div>
+        </div>
+      )}
+
+      {showDataInputBox && (
+        <div className={styles.overlay}>
+          <div className={styles.evidenceDataInputBox}>
+            <h2 className={styles.title}>
+              신규 증거 등록
+            </h2>
+
+            <div className={styles.fileRow}>
+              <label className={styles.fileLabel}>파일명 :</label>
+              <input
+                type="text"
+                value={uploadedFileInfo?.filename || ""}
+                readOnly
+                className={styles.fileNameBox}
+              />
+            </div>
+
+            <div className={styles.formGrid}>
+              <div><label>담당자</label><input type="text" name="responsible_member" value={formData.responsible_member} onChange={handleInputChange} /></div>
+              <div><label>사용자</label><input type="text" name="evidence_user" value={formData.evidence_user} onChange={handleInputChange} /></div>
+
+              <div><label>서명</label><input type="text" name="sign_file_path" value={formData.sign_file_path} onChange={handleInputChange} /></div>
+              <div><label>모델명</label><input type="text" name="model_name" value={formData.model_name} onChange={handleInputChange} /></div>
+
+              <div><label>제조사</label><input type="text" name="manufactory" value={formData.manufactory} onChange={handleInputChange} /></div>
+              <div><label>보관장소</label><input type="text" name="store_location" value={formData.store_location} onChange={handleInputChange} /></div>
+
+              <div><label>종류</label><select name="type" value={formData.type} onChange={handleInputChange}><option value="">-- 선택 --</option><option value="USB">USB</option><option value="HDD">HDD</option><option value="SSD">SSD</option></select></div>
+
+              <div><label>수집장소</label><input type="text" name="collect_location" value={formData.collect_location} onChange={handleInputChange} /></div>
+              <div><label>수집일자</label><input type="date" name="collect_date" value={formData.collect_date} onChange={handleInputChange} /></div>
+
+              <div><label>고유번호</label><input type="text" name="unique_number" value={formData.unique_number} onChange={handleInputChange} /></div>
+              <div><label>제조일자</label><input type="date" name="manufactory_date" value={formData.manufactory_date} onChange={handleInputChange} /></div>
+            </div>
+
+            <div className={styles.buttonRow}>
+              <button className={styles.cancelBtn} onClick={() => setShowDataInputBox(false)}>취소</button>
+              <button className={styles.submitBtn} onClick={handleCreateEvidence}>등록</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

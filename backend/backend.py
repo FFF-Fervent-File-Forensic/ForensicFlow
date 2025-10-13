@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker, relationship, Session
 from typing import List, Dict
 from datetime import datetime, date
 import random
+import hashlib
 
 # 1. DB 연결 설정
 SQLALCHEMY_DATABASE_URL = "mysql+pymysql://freedb_forensic:V3fwX87P%25z%26%2AwKg@sql.freedb.tech:3306/freedb_forensic_assist"
@@ -325,6 +326,37 @@ def deleteEvidence(evidence_id: int) -> bool:
     finally:
         db.close()
 
+# Evidence 테이블의 hash_value와 업로드된 파일의 SHA-256 해시가 동일한지 비교하는 함수
+def isSameHash(evidence_id: int, file) -> bool:
+    db: Session = SessionLocal()
+    try:
+        evidence = db.query(Evidence).filter(Evidence.id == evidence_id).first()
+        if not evidence:
+            print(f"[isSameHash] Evidence ID {evidence_id}를 찾을 수 없습니다.")
+            return False
+
+        db_hash = evidence.hash_value
+        if not db_hash:
+            print(f"[isSameHash] Evidence ID {evidence_id}의 hash_value가 존재하지 않습니다.")
+            return False
+
+        # 🔹 동기식으로 파일 읽기 (UploadFile.file 사용)
+        file.file.seek(0)
+        file_bytes = file.file.read()
+
+        file_hash = hashlib.sha256(file_bytes).hexdigest()
+        is_same = (file_hash == db_hash)
+
+        print(f"[isSameHash] evidence_id={evidence_id}, DB Hash={db_hash[:16]}..., File Hash={file_hash[:16]}..., Same={is_same}")
+        return is_same
+
+    except Exception as e:
+        print(f"[isSameHash] 오류 발생: {e}")
+        return False
+
+    finally:
+        db.close()
+
 # ===============================
 # == Transfer_information 함수 ==
 # ===============================
@@ -433,6 +465,35 @@ def deleteTransferInfo(transfer_id: int) -> bool:
         return True
     finally:
         db.close()
+
+# 특정 TransferInformation의 t_hash_validation_status 값을 변경
+def toggleTransformHash(transfer_id: int, value: bool) -> bool:
+    db = SessionLocal()
+    try:
+        # 대상 TransferInformation 조회
+        transfer = db.query(TransferInformation).filter(TransferInformation.id == transfer_id).first()
+
+        if transfer is None:
+            print(f"변경 실패 : TransferInformation ID {transfer_id} 가 존재하지 않습니다.")
+            return False
+
+        # 상태 변경
+        transfer.t_hash_validation_status = value
+
+        # DB에 반영
+        db.commit()
+        db.refresh(transfer)
+
+        print(f"변경 완료 : TransferInformation ID {transfer_id} 의 t_hash_validation_status → {value}")
+        return True
+
+    except Exception as e:
+        print(f"변경 중 오류 발생 : {e}")
+        return False
+
+    finally:
+        db.close()
+
 
 
 # ===============================
