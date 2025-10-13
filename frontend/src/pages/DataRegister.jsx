@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styles from "../styles/DataRegister.module.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function EvidenceManager() {
-  const CURRENT_CASEID = Number(localStorage.getItem("currentCaseID"));
+  const { caseId } = useParams();
+  console.log("caseId", caseId);
+  const CURRENT_CASEID = Number(caseId);
+  console.log("CURRENT_CASEID", CURRENT_CASEID);
   const navigate = useNavigate();
 
   // -----------------------------
@@ -230,7 +233,7 @@ export default function EvidenceManager() {
       <div className={styles.rightPane}>
         <button
           className={styles.addButton}
-          onClick={() => navigate("/transfer")}
+          onClick={() => navigate(`/transfer/${CURRENT_CASEID}`)}
         >
           다음 단계
         </button>

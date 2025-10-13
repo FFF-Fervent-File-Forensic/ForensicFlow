@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../styles/DataTransfer.module.css';
-import { useNavigate } from 'react-router-dom';
-import HashVerifierFooter from '../components/HashVerifierFooter';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const initialTransferForm = {
   출발위치: '',
@@ -28,14 +27,15 @@ export default function DataTransfer() {
   const [signatureFile, setSignatureFile] = useState(null);
   const [hashModalIdx, setHashModalIdx] = useState(null);
   const navigate = useNavigate();
+  const { caseId } = useParams();
+  const CURRENT_CASEID = Number(caseId);
 
   // --------------------------
-  // ① DB에서 EList 기반으로 데이터 불러오기 & rowStates 초기화
+  // ① DB에서 데이터 불러오기
   // --------------------------
   useEffect(() => {
     const fetchEvidenceData = async () => {
       try {
-        const CURRENT_CASEID = localStorage.getItem("currentCaseID");
         if (!CURRENT_CASEID) {
           alert("현재 사건 ID를 찾을 수 없습니다.");
           setLoading(false);
@@ -66,7 +66,6 @@ export default function DataTransfer() {
             date: result.collect_date,
           });
 
-          // TransferInfo 가져오기
           const tRes = await fetch(`http://localhost:8000/getTransferInfoList/${id}`);
           const tList = await tRes.json();
           let transferStatus = "pending";
@@ -74,15 +73,11 @@ export default function DataTransfer() {
           let transferData = null;
 
           if (tList.ids && tList.ids.length > 0) {
-            // TransferInfo 상세 데이터 가져오기 (t_hash_validation_status 포함)
             const tInfoRes = await fetch(`http://localhost:8000/getTransferInfo/${tList.ids[0]}`);
             const tInfo = await tInfoRes.json();
             transferData = tInfo;
             transferStatus = "done";
-            hashStatus = tInfo.t_hash_validation_status ? "done" : "none"; // 버튼 활성화 여부 결정
-
-            // 디버깅용 콘솔 출력
-            console.log(`[DEBUG] Evidence ID: ${id}, t_hash_validation_status:`, tInfo.t_hash_validation_status);
+            hashStatus = tInfo.t_hash_validation_status ? "done" : "none";
           }
 
           rowStatesWithTransfer.push({
@@ -92,8 +87,6 @@ export default function DataTransfer() {
             transferData,
           });
         }
-
-
 
         setEvidenceInfo(fetchedEvidence);
         setRowStates(rowStatesWithTransfer);
@@ -108,9 +101,8 @@ export default function DataTransfer() {
     fetchEvidenceData();
   }, []);
 
-
   // --------------------------
-  // 모달 및 폼 관련 함수
+  // 모달 관련
   // --------------------------
   const openModal = (idx) => {
     setModalIdx(idx);
@@ -149,7 +141,7 @@ export default function DataTransfer() {
   };
 
   // --------------------------
-  // handleRegister 수정 — Transfer 생성 시 해시 버튼 활성화
+  // 이송 정보 등록
   // --------------------------
   const handleRegister = async () => {
     if (!isFormValid()) {
@@ -161,8 +153,7 @@ export default function DataTransfer() {
       const evidence = evidenceInfo[modalIdx];
       if (!evidence) throw new Error("해당 증거 정보를 찾을 수 없습니다.");
 
-      const caseID = localStorage.getItem("currentCaseID");
-      const caseRes = await fetch(`http://localhost:8000/getCase/${caseID}`);
+      const caseRes = await fetch(`http://localhost:8000/getCase/${CURRENT_CASEID}`);
       if (!caseRes.ok) throw new Error("case_number 조회 실패");
       const caseData = await caseRes.json();
       const caseNumber = caseData.case_number;
@@ -199,7 +190,6 @@ export default function DataTransfer() {
 
       alert("이송 정보가 성공적으로 등록되었습니다.");
 
-      // rowStates 업데이트
       setRowStates((states) =>
         states.map((item, i) =>
           i === modalIdx
@@ -222,7 +212,7 @@ export default function DataTransfer() {
   };
 
   // --------------------------
-  // 해시 검증 기능
+  // 해시 검증
   // --------------------------
   const openHashModal = (idx) => {
     setHashModalIdx(idx);
@@ -256,7 +246,6 @@ export default function DataTransfer() {
 
       if (isSame === true) {
         alert("✅ 해시 검증 완료!");
-
         const transferData = rowStates[hashModalIdx]?.transferData;
         if (transferData && transferData.id) {
           await fetch(`http://localhost:8000/toggleTransferHash/${transferData.id}`, {
@@ -265,7 +254,6 @@ export default function DataTransfer() {
             body: JSON.stringify({ value: true })
           });
         }
-
 
         setRowStates((states) =>
           states.map((item, i) =>
@@ -288,9 +276,6 @@ export default function DataTransfer() {
     (item) => item.transferStatus === 'done' && item.hashStatus === 'done'
   );
 
-  // --------------------------
-  // 렌더링
-  // --------------------------
   if (loading) {
     return (
       <div className={styles.dtContainer}>
@@ -303,6 +288,96 @@ export default function DataTransfer() {
 
   return (
     <div className={styles.dtContainer}>
+      {/* 이송 정보 모달 */}
+      {modalIdx !== null && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBackdrop} onClick={closeModal} />
+          <div className={styles.modalContent}>
+            <h3>이송 정보 입력</h3>
+
+            <input
+              type="text"
+              placeholder="출발위치"
+              value={form.출발위치}
+              onChange={(e) => handleFormChange("출발위치", e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="도착위치"
+              value={form.도착위치}
+              onChange={(e) => handleFormChange("도착위치", e.target.value)}
+            />
+            <input
+              type="datetime-local"
+              value={form.이송일시}
+              onChange={(e) => handleFormChange("이송일시", e.target.value)}
+            />
+            <input
+              type="datetime-local"
+              value={form.도착일시}
+              onChange={(e) => handleFormChange("도착일시", e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="발신자"
+              value={form.발신자}
+              onChange={(e) => handleFormChange("발신자", e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="발신자 연락처"
+              value={form.발신자연락처}
+              onChange={(e) => handleFormChange("발신자연락처", e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="이송자"
+              value={form.이송자}
+              onChange={(e) => handleFormChange("이송자", e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="이송자 연락처"
+              value={form.이송자연락처}
+              onChange={(e) => handleFormChange("이송자연락처", e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="수령자"
+              value={form.수령자}
+              onChange={(e) => handleFormChange("수령자", e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="수령자 연락처"
+              value={form.수령자연락처}
+              onChange={(e) => handleFormChange("수령자연락처", e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="담당자"
+              value={form.담당자}
+              onChange={(e) => handleFormChange("담당자", e.target.value)}
+            />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleFormChange("이미지", e.target.files[0])}
+            />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setSignatureFile(e.target.files[0])}
+            />
+
+            <div className={styles.formButtons}>
+              <button onClick={handleRegister}>등록</button>
+              <button onClick={closeModal}>취소</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 해시 검증 모달 */}
       {hashModalIdx !== null && (
         <div className={styles.hashModalOverlay}>
@@ -383,7 +458,7 @@ export default function DataTransfer() {
         <button
           className={`${styles.dtNextBtn} ${isAllDone ? styles.dtNextBtnActive : ''}`}
           disabled={!isAllDone}
-          onClick={() => navigate('/analyze')}
+          onClick={() => navigate(`/analyze/${CURRENT_CASEID}`)}
         >
           다음 단계
         </button>
