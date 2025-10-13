@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import styles from "../styles/CaseAdmin.module.css";
+import { useParams } from 'react-router-dom';
 
 export default function CaseAdmin() {
   const [cases, setCases] = useState([]);
   const [members, setMembers] = useState([]);
-  const [selectedCaseId, setSelectedCaseId] = useState(null);
   const [selectedMemberId, setSelectedMemberId] = useState(null);
   const [selectedAuthority, setSelectedAuthority] = useState("");
   const [memberRoles, setMemberRoles] = useState({}); // member_id: role
   const [caseMembers, setCaseMembers] = useState([]); // 선택 사건 회원 (테이블용)
-  const authorityMap = { "읽기": "readable", "쓰기": "writeable" };
-  
+  const { caseId } = useParams();
   // 1) 사건 목록
   useEffect(() => {
     fetch("http://localhost:8000/getCaseList")
@@ -36,11 +35,7 @@ export default function CaseAdmin() {
 
   // 3) 선택한 사건에 대한 MemberCase 정보 가져오기
   useEffect(() => {
-    if (!selectedCaseId) {
-      setCaseMembers([]); // 사건 선택 해제 시 테이블 비우기
-      return;
-    }
-    fetch(`http://localhost:8000/getMembersByCase/${selectedCaseId}`)
+    fetch(`http://localhost:8000/getMembersByCase/${caseId}`)
       .then(res => res.json())
       .then(data => {
         const membersData = data.memberCases.map(mc => ({
@@ -61,13 +56,13 @@ export default function CaseAdmin() {
         setMemberRoles(rolesMap);
       })
       .catch(err => console.error("회원-사건 정보 실패", err));
-  }, [selectedCaseId]);
+  }, [caseId]);
 
   // MemberCase 등록 (form submit)
   const handleAddMemberCase = async (e) => {
     e.preventDefault();
-    if (!selectedCaseId || !selectedMemberId || !selectedAuthority) {
-      alert("사건, 회원, 권한을 모두 선택해주세요.");
+    if (!selectedMemberId || !selectedAuthority) {
+      alert("회원, 권한을 모두 선택해주세요.");
       return;
     }
 
@@ -77,7 +72,7 @@ export default function CaseAdmin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           member_id: selectedMemberId,
-          case_id: selectedCaseId,
+          case_id: caseId,
           authority: selectedAuthority,
         }),
       });
@@ -123,7 +118,7 @@ export default function CaseAdmin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           member_id,
-          case_id: selectedCaseId,
+          case_id: caseId,
           authority,
         }),
       });
@@ -147,24 +142,11 @@ export default function CaseAdmin() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>사건별 회원 권한 관리</h1>
+      <h1 className={styles.title}>회원 권한 관리</h1>
 
       {/* 사건 선택 + MemberCase 등록 */}
       <div className={styles.formRow}>
         <form onSubmit={handleAddMemberCase} className={styles.formRow}>
-          <select
-            value={selectedCaseId || ""}
-            onChange={e => setSelectedCaseId(Number(e.target.value))}
-            className={styles.select}
-          >
-            <option value="" disabled>사건 선택</option>
-            {cases.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.case_number} ({c.present_stair})
-              </option>
-            ))}
-          </select>
-
           <select
             value={selectedMemberId || ""}
             onChange={e => setSelectedMemberId(Number(e.target.value))}
