@@ -34,7 +34,7 @@ function App() {
           <Route element={<Layout />}>
             <Route path="/analyze/:caseId" element={<Analyze />} />
             <Route path="/analyzeinput/:caseId/:evidenceId" element={<Analyzeinput />} />
-            <Route path="/reportPage" element={<ReportPage />} />
+            <Route path="/reportPage/:caseId" element={<ReportPage />} />
             <Route path="/register/:caseId" element={<DataRegister />} />
             <Route path="/transfer/:caseId" element={<DataTransfer />} />
             <Route path="/admin/:caseId" element={<CaseAdmin />} />
