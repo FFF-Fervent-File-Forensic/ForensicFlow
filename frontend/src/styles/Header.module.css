@@ -29,7 +29,7 @@
 .navLink {
   font-size: 1rem;
   font-weight: 500;
-  color: #3b3b3b;
+  color: #3b3b3b; /* 기본 */
   text-decoration: none;
   padding: 0.5rem 1rem;
   border-radius: 9999px;
@@ -37,18 +37,30 @@
   position: relative;
 }
 
+/* ① 활성화 O / 현재 페이지 X */
 .navLink:hover {
   background-color: rgba(0, 0, 0, 0.05);
   color: #0066ff;
   transform: translateY(-2px);
 }
 
-.navLink.disabled {
+/* ② 활성화 O / 현재 페이지 O */
+.navLink.active {
   color: #0066ff;
   font-weight: 600;
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgba(0, 102, 255, 0.1);
+  cursor: default;
+  pointer-events: none; /* 이미 현재 페이지니까 클릭 비활성 */
+}
+
+/* ③ 활성화 X */
+.navLink.disabled {
+  color: #999999;
+  font-weight: 500;
+  background-color: transparent;
   cursor: not-allowed;
   pointer-events: none;
+  opacity: 0.6;
 }
 
 .adminButton {

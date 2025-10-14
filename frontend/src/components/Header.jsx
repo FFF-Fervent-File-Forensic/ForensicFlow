@@ -93,8 +93,9 @@ export default function Header() {
               <Link
                 key={link.name}
                 to={enabled ? fullPath : '#'}
-                className={`${styles.navLink} ${location.pathname.startsWith(link.path) || !enabled ? styles.disabled : ''
-                  }`}
+                className={`${styles.navLink} 
+                  ${!enabled ? styles.disabled : ''} 
+                  ${enabled && location.pathname.startsWith(link.path) ? styles.active : ''}`}
                 onClick={(e) => {
                   if (!enabled) e.preventDefault(); // 비활성화 클릭 막기
                 }}
