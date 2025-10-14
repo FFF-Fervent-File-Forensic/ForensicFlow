@@ -144,7 +144,7 @@ export default function EvidenceManager() {
       model_name: formData.model_name,
       collect_location: formData.collect_location,
       store_location: formData.store_location,
-      unique_number: parseInt(formData.unique_number),
+      unique_number: formData.unique_number,
       manufactory_date: formData.manufactory_date,
       collect_date: formData.collect_date,
       sign_file_path: formData.sign_file_path,

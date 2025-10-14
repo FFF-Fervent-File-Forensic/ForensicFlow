@@ -46,7 +46,7 @@ class Evidence(Base):
     model_name = Column(String(100))
     collect_location = Column(String(255))
     store_location = Column(String(255))
-    unique_number = Column(Integer)
+    unique_number = Column(String(255))
     manufactory_date = Column(Date)
     collect_date = Column(Date)
     sign_file_path = Column(String(255))

@@ -47,7 +47,7 @@ class EvidenceCreate(BaseModel):
     model_name: str
     collect_location: str
     store_location: str
-    unique_number: int
+    unique_number: str
     manufactory_date: date
     collect_date: date
     sign_file_path: str
