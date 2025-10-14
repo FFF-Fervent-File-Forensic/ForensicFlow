@@ -242,23 +242,39 @@ export default function EvidenceManager() {
                 return;
               }
 
-              // 1️⃣ present_stair 변경 요청
-              const response = await fetch(`http://localhost:8000/updatePresentStair/${CURRENT_CASEID}`, {
+              // 1️⃣ 현재 Case 데이터 가져오기
+              const caseResponse = await fetch(`http://localhost:8000/getCase/${CURRENT_CASEID}`);
+              const caseResult = await caseResponse.json();
+
+              if (!caseResponse.ok) {
+                alert("사건 정보를 불러오는 데 실패했습니다.");
+                return;
+              }
+
+              console.log("현재 사건 데이터:", caseResult);
+
+              // 2️⃣ 현재 present_stair 확인
+              const currentStair = caseResult.present_stair;
+
+              if (currentStair === "증거 수집 중") {
+                // 3️⃣ present_stair 변경 요청
+              const updateResponse = await fetch(`http://localhost:8000/updatePresentStair/${CURRENT_CASEID}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ new_stair: "증거 이송 중" }),
               });
 
-              const result = await response.json();
+              const updateResult = await updateResponse.json();
 
-              if (!result.success) {
+              if (!updateResult.success) {
                 alert("사건 단계 업데이트에 실패했습니다.");
                 return;
               }
 
               console.log(`Case ${CURRENT_CASEID} present_stair → '증거 이송 중' 으로 변경됨`);
+              }
 
-              // 2️⃣ 페이지 이동
+              // 4️⃣ 페이지 이동
               navigate(`/transfer/${CURRENT_CASEID}`);
 
             } catch (error) {
@@ -269,6 +285,7 @@ export default function EvidenceManager() {
         >
           다음 단계
         </button>
+
 
 
         <button

@@ -467,33 +467,50 @@ export default function DataTransfer() {
                 return;
               }
 
-              // 1️⃣ present_stair 변경 요청
-              const response = await fetch(`http://localhost:8000/updatePresentStair/${CURRENT_CASEID}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ new_stair: "증거 분석 중" }),
-              });
+              // 1️⃣ 현재 Case 정보 가져오기
+              const caseResponse = await fetch(`http://localhost:8000/getCase/${CURRENT_CASEID}`);
+              const caseData = await caseResponse.json();
 
-              const result = await response.json();
-
-              if (!result.success) {
-                alert("사건 단계 업데이트에 실패했습니다.");
+              if (!caseData || !caseData.present_stair) {
+                alert("사건 정보를 불러오지 못했습니다.");
+                navigate(`/analyze/${CURRENT_CASEID}`); // 정보가 없어도 페이지는 이동
                 return;
               }
 
-              console.log(`Case ${CURRENT_CASEID} present_stair → '증거 분석 중' 으로 변경됨`);
+              console.log(`현재 사건 단계: ${caseData.present_stair}`);
 
-              // 2️⃣ 페이지 이동
+              // 2️⃣ present_stair가 "증거 이송 중"일 경우만 갱신
+              if (caseData.present_stair === "증거 이송 중") {
+                const updateResponse = await fetch(`http://localhost:8000/updatePresentStair/${CURRENT_CASEID}`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ new_stair: "증거 분석 중" }),
+                });
+
+                const updateResult = await updateResponse.json();
+
+                if (!updateResult.success) {
+                  console.warn("사건 단계 업데이트에 실패했습니다.");
+                } else {
+                  console.log(`Case ${CURRENT_CASEID} present_stair → '증거 분석 중' 으로 변경됨`);
+                }
+              } else {
+                console.log(`현재 단계(${caseData.present_stair})가 '증거 이송 중'이 아니므로 갱신 생략`);
+              }
+
+              // 3️⃣ 페이지 이동 (조건과 관계없이 항상)
               navigate(`/analyze/${CURRENT_CASEID}`);
 
             } catch (error) {
               console.error("업데이트 중 오류 발생:", error);
               alert("서버와 통신 중 오류가 발생했습니다.");
+              navigate(`/analyze/${CURRENT_CASEID}`); // 오류가 있어도 페이지는 이동
             }
           }}
         >
           다음 단계
         </button>
+
 
       </div>
     </div>
