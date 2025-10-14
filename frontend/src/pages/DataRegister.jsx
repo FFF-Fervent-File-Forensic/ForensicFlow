@@ -233,10 +233,43 @@ export default function EvidenceManager() {
       <div className={styles.rightPane}>
         <button
           className={styles.addButton}
-          onClick={() => navigate(`/transfer/${CURRENT_CASEID}`)}
+          onClick={async () => {
+            try {
+              const CURRENT_CASEID = localStorage.getItem("currentCaseID");
+
+              if (!CURRENT_CASEID) {
+                alert("현재 사건 ID를 찾을 수 없습니다.");
+                return;
+              }
+
+              // 1️⃣ present_stair 변경 요청
+              const response = await fetch(`http://localhost:8000/updatePresentStair/${CURRENT_CASEID}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ new_stair: "증거 이송 중" }),
+              });
+
+              const result = await response.json();
+
+              if (!result.success) {
+                alert("사건 단계 업데이트에 실패했습니다.");
+                return;
+              }
+
+              console.log(`Case ${CURRENT_CASEID} present_stair → '증거 이송 중' 으로 변경됨`);
+
+              // 2️⃣ 페이지 이동
+              navigate(`/transfer/${CURRENT_CASEID}`);
+
+            } catch (error) {
+              console.error("업데이트 중 오류 발생:", error);
+              alert("서버와 통신 중 오류가 발생했습니다.");
+            }
+          }}
         >
           다음 단계
         </button>
+
 
         <button
           className={styles.addEvidenceButton}

@@ -145,6 +145,13 @@ def delete_case(case_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# 특정 Case의 present_stair 값을 변경
+@app.put("/updatePresentStair/{case_id}")
+def update_present_stair(case_id: int, payload: dict = Body(...)):
+    success = backend.updateCasePresentStair(case_id, payload["new_stair"])
+    return {"success": success}
+
+
 # =================
 # == Evidence 엔드포인트 ==
 # =================
