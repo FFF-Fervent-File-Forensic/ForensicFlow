@@ -126,7 +126,12 @@ function Main() {
 
       setCaseList(prev => [
         ...prev,
-        { id: formData.caseNumber, progress: '증거 수집 중', progressPercent: 0 },
+        { 
+          caseId: newCase.id,
+          caseNumber: formData.caseNumber,
+          progress: '증거 수집 중', 
+          progressPercent: 0 
+        },
       ]);
 
       setShowModal(false);
