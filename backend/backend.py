@@ -226,6 +226,36 @@ def deleteCase(case_id: int) -> bool:
     finally:
         db.close()
 
+
+# 특정 Case의 present_stair 값을 변경
+def updateCasePresentStair(case_id: int, new_stair: int) -> bool:
+    db = SessionLocal()
+    try:
+        # 대상 Case 조회
+        case = db.query(CaseTable).filter(CaseTable.id == case_id).first()
+
+        if case is None:
+            print(f"변경 실패 : Case ID {case_id} 가 존재하지 않습니다.")
+            return False
+
+        # 값 변경
+        case.present_stair = new_stair
+
+        # DB에 반영
+        db.commit()
+        db.refresh(case)
+
+        print(f"변경 완료 : Case ID {case_id} 의 present_stair → {new_stair}")
+        return True
+
+    except Exception as e:
+        print(f"변경 중 오류 발생 : {e}")
+        return False
+
+    finally:
+        db.close()
+
+
 # ===================
 # == Evidence 함수 ==
 # ===================

@@ -458,10 +458,60 @@ export default function DataTransfer() {
         <button
           className={`${styles.dtNextBtn} ${isAllDone ? styles.dtNextBtnActive : ''}`}
           disabled={!isAllDone}
-          onClick={() => navigate(`/analyze/${CURRENT_CASEID}`)}
+          onClick={async () => {
+            try {
+              const CURRENT_CASEID = localStorage.getItem("currentCaseID");
+
+              if (!CURRENT_CASEID) {
+                alert("현재 사건 ID를 찾을 수 없습니다.");
+                return;
+              }
+
+              // 1️⃣ 현재 Case 정보 가져오기
+              const caseResponse = await fetch(`http://localhost:8000/getCase/${CURRENT_CASEID}`);
+              const caseData = await caseResponse.json();
+
+              if (!caseData || !caseData.present_stair) {
+                alert("사건 정보를 불러오지 못했습니다.");
+                navigate(`/analyze/${CURRENT_CASEID}`); // 정보가 없어도 페이지는 이동
+                return;
+              }
+
+              console.log(`현재 사건 단계: ${caseData.present_stair}`);
+
+              // 2️⃣ present_stair가 "증거 이송 중"일 경우만 갱신
+              if (caseData.present_stair === "증거 이송 중") {
+                const updateResponse = await fetch(`http://localhost:8000/updatePresentStair/${CURRENT_CASEID}`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ new_stair: "증거 분석 중" }),
+                });
+
+                const updateResult = await updateResponse.json();
+
+                if (!updateResult.success) {
+                  console.warn("사건 단계 업데이트에 실패했습니다.");
+                } else {
+                  console.log(`Case ${CURRENT_CASEID} present_stair → '증거 분석 중' 으로 변경됨`);
+                }
+              } else {
+                console.log(`현재 단계(${caseData.present_stair})가 '증거 이송 중'이 아니므로 갱신 생략`);
+              }
+
+              // 3️⃣ 페이지 이동 (조건과 관계없이 항상)
+              navigate(`/analyze/${CURRENT_CASEID}`);
+
+            } catch (error) {
+              console.error("업데이트 중 오류 발생:", error);
+              alert("서버와 통신 중 오류가 발생했습니다.");
+              navigate(`/analyze/${CURRENT_CASEID}`); // 오류가 있어도 페이지는 이동
+            }
+          }}
         >
           다음 단계
         </button>
+
+
       </div>
     </div>
   );
