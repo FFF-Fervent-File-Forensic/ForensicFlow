@@ -44,7 +44,7 @@ export default function AnalysisInputForm() {
   const { caseId, evidenceId } = useParams();
   const [ currentEvidence, setCurrentEvidence ] = useState(null);
 
-  useEffect(async () => {
+  useEffect(() => {
     async function fetchCurrentEvidence() {
       const res = await fetch(`${API_BASE}/getEvidence/${evidenceId}`);
       if (res.ok) {
@@ -100,19 +100,18 @@ const onHashValid = async () => {
   console.log("해시 검증 성공! (옵션) 파일 업로드 + DB 저장 요청 시작.");
 
   try {
-    const evidenceId = Number(evidenceId);
 
     // 파일 없으면 그냥 파일 없이 전송됨
     const created = await postCreateAnalysisMultipart({
       form,
       file,        // 없을 수 있음
-      evidenceId,
+      evidenceId
     });
 
     console.log("백엔드 저장 완료:", created);
 
     setShowModal(false);
-    navigate("/analyze");
+    navigate(`/analyze/${caseId}`);
   } catch (err) {
     console.error(err);
     alert(`분석 정보 저장 중 오류가 발생했습니다.\n${String(err)}`);
