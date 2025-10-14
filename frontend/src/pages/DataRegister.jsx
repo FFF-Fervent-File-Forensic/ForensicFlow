@@ -235,13 +235,6 @@ export default function EvidenceManager() {
           className={styles.addButton}
           onClick={async () => {
             try {
-              const CURRENT_CASEID = localStorage.getItem("currentCaseID");
-
-              if (!CURRENT_CASEID) {
-                alert("현재 사건 ID를 찾을 수 없습니다.");
-                return;
-              }
-
               // 1️⃣ 현재 Case 데이터 가져오기
               const caseResponse = await fetch(`http://localhost:8000/getCase/${CURRENT_CASEID}`);
               const caseResult = await caseResponse.json();
