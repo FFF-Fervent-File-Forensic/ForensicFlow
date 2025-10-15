@@ -123,7 +123,11 @@ html, body {
 }
 
 .hashModalOverlay {
-  composes: modalOverlay;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   z-index: 2100;
 }
 
@@ -144,7 +148,7 @@ html, body {
 }
 
 .modalContent { /* Base for upload-box dt-modal-upload-box */
-  background-color: #fff;
+  background-color: #ffffff;
   border: 1px solid #aeaeae;
   border-radius: 12px;
   box-shadow: 0 0 10px rgba(0,0,0,0.08);
@@ -168,12 +172,17 @@ html, body {
 }
 
 .hashModalContent {
-  composes: modalContent;
-  min-width: 400px;
-  width: 440px;
-  padding: 32px 36px;
-  z-index: 2102;
-  align-items: flex-start;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgb(249, 249, 249);
+  border-radius: 40px;
+  padding: 30px 50px;
+  width: 30%;
+  height: 30%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  z-index: 9999;
 }
 
 .uploadTitle {
@@ -380,4 +389,146 @@ html, body {
   font-size: 16px;
   text-align: center;
   width: 100%;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modalBackdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.modalContent {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgb(249, 249, 249);
+  border-radius: 40px;
+  padding: 30px 50px;
+  width: 1100px;
+  height: 81%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  z-index: 9999;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+
+.title {
+  color: #0066cc;
+  font-weight: 800;
+  font-size: 28px;
+}
+
+.fileNameBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fileNameBoxInner {
+  width: 500px;
+  height: 40px;
+  border: 2px solid #0066ff;
+  background-color: #ffffff;
+  border-radius: 3px;
+  padding-left: 10px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 50px;
+}
+
+.column label {
+  color: #999;
+  font-size: 15px;
+  margin-bottom: 3px;
+  display: block;
+}
+
+.column input {
+  width: 100%;
+  height: 40px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 2px solid rgb(167, 167, 167);
+  border-radius: 5px;
+  margin-bottom: 15px;
+  padding-left: 10px;
+  font-size: 15px;
+}
+
+.signRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.signBtn {
+  width: 80px;
+  height: 45px;
+  border: 2px solid #999;
+  border-radius: 15px;
+  background-color: #f5f5f5;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fileRow span {
+  color: #888;
+  font-size: 15px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.cancelBtn {
+  background: white;
+  border: 2px solid #ccc;
+  padding: 10px 25px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.submitBtn {
+  background: #0066ff;
+  border: none;
+  color: white;
+  padding: 10px 25px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
 }

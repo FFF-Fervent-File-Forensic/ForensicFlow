@@ -161,8 +161,24 @@ export default function DataTransfer() {
       const signaturePath = `/signs/${signatureFile?.name || "unknown_sign.png"}`;
       const imagePath = `/images/${form.이미지?.name || "unknown_image.png"}`;
 
+      console.log("case_number : ", caseNumber);
+      console.log("departure_location : ", form.출발위치);
+      console.log("departure_date : ", form.이송일시.split('T')[0]);
+      console.log("arrival_location : ", form.도착위치);
+      console.log("arrival_date : ", form.도착일시.split('T')[0]);
+      console.log("sender : ", form.발신자);
+      console.log("sender_contact : ", form.발신자연락처);
+      console.log("receiver : ", form.수령자);
+      console.log("receiver_contact : ", form.수령자연락처);
+      console.log("transfer_manager : ", form.이송자);
+      console.log("transfer_manager_contact : ", form.이송자연락처);
+      console.log("responsible_member : ", form.담당자);
+      console.log("responsible_member_sign : ", signaturePath);
+      console.log("image_file_path : ", imagePath);
+      console.log("evidence_id : ", evidence.id);
+
       const transferData = {
-        case_number: Number(caseNumber),
+        case_number: caseNumber,
         t_hash_validation_status: false,
         departure_location: form.출발위치,
         departure_date: form.이송일시.split('T')[0],
@@ -293,86 +309,96 @@ export default function DataTransfer() {
         <div className={styles.modalOverlay}>
           <div className={styles.modalBackdrop} onClick={closeModal} />
           <div className={styles.modalContent}>
-            <h3>이송 정보 입력</h3>
+            <div className={styles.header}>
+              <h2 className={styles.title}>이송 정보 등록</h2>
+              <div className={styles.fileNameBox}>
+                <label>파일명 :</label>
+                <div className={styles.fileNameBoxInner}>
+                  {evidenceInfo[modalIdx].name || "파일명이 없습니다"}
+                </div>
+              </div>
+            </div>
 
-            <input
-              type="text"
-              placeholder="출발위치"
-              value={form.출발위치}
-              onChange={(e) => handleFormChange("출발위치", e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="도착위치"
-              value={form.도착위치}
-              onChange={(e) => handleFormChange("도착위치", e.target.value)}
-            />
-            <input
-              type="datetime-local"
-              value={form.이송일시}
-              onChange={(e) => handleFormChange("이송일시", e.target.value)}
-            />
-            <input
-              type="datetime-local"
-              value={form.도착일시}
-              onChange={(e) => handleFormChange("도착일시", e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="발신자"
-              value={form.발신자}
-              onChange={(e) => handleFormChange("발신자", e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="발신자 연락처"
-              value={form.발신자연락처}
-              onChange={(e) => handleFormChange("발신자연락처", e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="이송자"
-              value={form.이송자}
-              onChange={(e) => handleFormChange("이송자", e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="이송자 연락처"
-              value={form.이송자연락처}
-              onChange={(e) => handleFormChange("이송자연락처", e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="수령자"
-              value={form.수령자}
-              onChange={(e) => handleFormChange("수령자", e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="수령자 연락처"
-              value={form.수령자연락처}
-              onChange={(e) => handleFormChange("수령자연락처", e.target.value)}
-            />
-            <input
-              type="text"
-              placeholder="담당자"
-              value={form.담당자}
-              onChange={(e) => handleFormChange("담당자", e.target.value)}
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleFormChange("이미지", e.target.files[0])}
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setSignatureFile(e.target.files[0])}
-            />
+            <div className={styles.formGrid}>
+              <div className={styles.column}>
+                <label>출발 위치</label>
+                <input type="text" value={form.출발위치 || ""} onChange={(e) => handleFormChange("출발위치", e.target.value)} />
 
-            <div className={styles.formButtons}>
-              <button onClick={handleRegister}>등록</button>
-              <button onClick={closeModal}>취소</button>
+                <label>이송 일시</label>
+                <input type="datetime-local" value={form.이송일시 || ""} onChange={(e) => handleFormChange("이송일시", e.target.value)} />
+
+                <label>발신자</label>
+                <input type="text" value={form.발신자 || ""} onChange={(e) => handleFormChange("발신자", e.target.value)} />
+
+                <label>이송자</label>
+                <input type="text" value={form.이송자 || ""} onChange={(e) => handleFormChange("이송자", e.target.value)} />
+
+                <label>수령자</label>
+                <input type="text" value={form.수령자 || ""} onChange={(e) => handleFormChange("수령자", e.target.value)} />
+
+                <label>담당자</label>
+                <div className={styles.signRow}>
+                  <input type="text" value={form.담당자 || ""} onChange={(e) => handleFormChange("담당자", e.target.value)} />
+                  
+                  {/* ✅ 서명 업로드 버튼 */}
+                  <button
+                    className={styles.signBtn}
+                    onClick={() => document.getElementById('signUpload').click()}
+                  >
+                    서명
+                  </button>
+                  <input
+                    id="signUpload"
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={(e) => setSignatureFile(e.target.files[0])}
+                  />
+                  {signatureFile && (
+                    <span style={{ marginLeft: '10px', fontSize: '13px', color: '#444' }}>
+                      {signatureFile.name}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.column}>
+                <label>도착 위치</label>
+                <input type="text" value={form.도착위치 || ""} onChange={(e) => handleFormChange("도착위치", e.target.value)} />
+
+                <label>도착 일시</label>
+                <input type="datetime-local" value={form.도착일시 || ""} onChange={(e) => handleFormChange("도착일시", e.target.value)} />
+
+                <label>발신자 연락처</label>
+                <input type="text" value={form.발신자연락처 || ""} onChange={(e) => handleFormChange("발신자연락처", e.target.value)} />
+
+                <label>이송자 연락처</label>
+                <input type="text" value={form.이송자연락처 || ""} onChange={(e) => handleFormChange("이송자연락처", e.target.value)} />
+
+                <label>수령자 연락처</label>
+                <input type="text" value={form.수령자연락처 || ""} onChange={(e) => handleFormChange("수령자연락처", e.target.value)} />
+
+                <label>증거 사진</label>
+                {/* ✅ fileRow 제거, 버튼만 남김 */}
+                <button
+                  className={styles.fileRow}
+                  onClick={() => document.getElementById('imageUpload').click()}
+                >
+                  파일 첨부
+                </button>
+                <input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={(e) => handleFormChange("이미지", e.target.files[0])}
+                />
+              </div>
+            </div>
+
+            <div className={styles.buttons}>
+              <button className={styles.cancelBtn} onClick={closeModal}>취소</button>
+              <button className={styles.submitBtn} onClick={handleRegister}>등록</button>
             </div>
           </div>
         </div>
