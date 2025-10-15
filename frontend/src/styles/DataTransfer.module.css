@@ -11,22 +11,24 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 60px;
-  margin: 30px 170px;
+  padding: 4vw 5vw;
+  margin: 30px auto;
   background: white;
   border-radius: 8px;
   border: 1px solid #d1d1d1;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  padding: 30px;
   position: relative;
+  max-width: 1200px;
+  box-sizing: border-box;
 }
 
 .dtTable {
-  width: 90vw;
-  max-width: 1100px;
+  width: 100%;
   border-collapse: collapse;
   margin-bottom: 40px;
   font-size: 15px;
+  table-layout: fixed;
+  word-break: break-word;
 }
 
 .dtTable th,
@@ -80,10 +82,9 @@ html, body {
 }
 
 .dtBottomBtn {
-  width: 100vw;
   display: flex;
   justify-content: flex-end;
-  padding-right: 200px;
+  padding: 20px 40px 0 0;
   box-sizing: border-box;
 }
 
@@ -405,130 +406,146 @@ html, body {
   inset: 0;
 }
 
+/* --- ✅ 모달창 크기 & 내부 폼 축소 버전 --- */
+
 .modalContent {
-  position: absolute;
-  top: 55%;
+  position: fixed;
+  top: 100px; /* 헤더 높이에 맞게 조절: 100~130px 추천 */
   left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgb(249, 249, 249);
-  border-radius: 40px;
-  padding: 30px 50px;
-  width: 1100px;
-  height: 81%;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  z-index: 9999;
+  transform: translateX(-50%); /* 세로 정렬 제거! */
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px 28px;
+  width: 640px;
+  max-height: 75vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  z-index: 900; /* 헤더보다 낮게, 그러나 내용 위로 */
 }
 
+
+/* 헤더 */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 25px;
+  margin-bottom: 15px;
 }
 
 .title {
-  color: #0066cc;
-  font-weight: 800;
-  font-size: 28px;
-}
-
-.fileNameBox {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  color: #0055cc;
+  font-weight: 700;
+  font-size: 20px;
 }
 
 .fileNameBoxInner {
-  width: 500px;
-  height: 40px;
-  border: 2px solid #0066ff;
-  background-color: #ffffff;
-  border-radius: 3px;
-  padding-left: 10px;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  width: 280px;
+  height: 34px;
+  border: 1px solid #0066ff;
+  border-radius: 6px;
+  padding: 0 10px;
+  font-size: 14px;
 }
 
+/* 폼 */
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px 50px;
+  gap: 12px 24px;
 }
 
 .column label {
-  color: #999;
-  font-size: 15px;
+  color: #666;
+  font-size: 13px;
   margin-bottom: 3px;
   display: block;
 }
 
 .column input {
   width: 100%;
-  height: 40px;
-  border-top: none;
-  border-left: none;
-  border-right: none;
-  border-bottom: 2px solid rgb(167, 167, 167);
-  border-radius: 5px;
-  margin-bottom: 15px;
-  padding-left: 10px;
-  font-size: 15px;
+  height: 28px;        /* 34px → 28px */
+  border: 1px solid #ccc;
+  border-radius: 4px;  /* 둥근 정도 살짝 줄임 */
+  margin-bottom: 8px;
+  padding: 2px 6px;    /* 여백 축소 */
+  font-size: 13px;     /* 글자 크기 줄임 */
 }
 
 .signRow {
   display: flex;
-  gap: 8px;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
 }
 
 .signBtn {
-  width: 80px;
-  height: 45px;
-  border: 2px solid #999;
-  border-radius: 15px;
-  background-color: #f5f5f5;
-  font-weight: bold;
+  width: 60px;
+  height: 34px;
+  border: 1px solid #999;
+  border-radius: 8px;
+  background-color: #f8f8f8;
+  font-size: 13px;
   cursor: pointer;
 }
 
 .fileRow {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: flex-start;
 }
 
-.fileRow span {
-  color: #888;
-  font-size: 15px;
+.fileRow,
+.fileRow button {
+  width: 100%;
+  height: 34px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f8f8f8;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 15px;
-  margin-top: 30px;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cancelBtn,
+.submitBtn {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 .cancelBtn {
-  background: white;
-  border: 2px solid #ccc;
-  padding: 10px 25px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
+  background: #fff;
+  border: 1px solid #ccc;
+  color: #333;
 }
 
 .submitBtn {
   background: #0066ff;
+  color: #fff;
   border: none;
-  color: white;
-  padding: 10px 25px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
+}
+
+.submitBtn:hover {
+  background: #0052cc;
+}
+
+/* 해시 검증 모달 */
+.hashModalContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 36px;
+  width: 400px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
