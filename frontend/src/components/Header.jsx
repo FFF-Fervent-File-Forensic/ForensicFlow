@@ -62,8 +62,8 @@ export default function Header() {
         return ['홈', '사건 등록', '증거 등록', '증거 이송 및 보관'].includes(linkName);
       case '증거 분석 중':
         return ['홈', '사건 등록', '증거 등록', '증거 이송 및 보관', '증거 분석'].includes(linkName);
-      case '완료':
-        return true;
+      case '분석 완료':
+        return  ['홈', '결과 보고서'].includes(linkName);
       default:
         return false;
     }

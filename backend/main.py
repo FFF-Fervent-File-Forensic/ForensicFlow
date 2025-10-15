@@ -426,6 +426,20 @@ def get_member(member_id: int):
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@app.get("/getMemberByEmail/{email}")
+def get_member_by_email(email: str):
+    try:
+        data = backend.getMemberByEmail(email)
+        if not data:
+            raise HTTPException(status_code=404, detail="해당 회원은 존재하지 않습니다.")
+        return {
+            "id": data.id,
+            "member_name": data.member_name,
+            "login_email": data.login_email
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/login")
 def login(request: LoginRequest):
