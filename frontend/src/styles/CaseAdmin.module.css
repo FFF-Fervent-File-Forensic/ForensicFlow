@@ -23,17 +23,13 @@
   margin-bottom: 20px;
 }
 
-.leftGroup {
-  display: flex;
-  gap: 10px;
-}
-
 .searchInput {
   padding: 8px 12px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
   min-width: 200px;
+  margin-right: 10px;
 }
 
 .input,
@@ -42,6 +38,7 @@
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
+  margin-right: 10px;
 }
 
 .addButton {
@@ -96,15 +93,15 @@
   text-align: center;
 }
 
-.deleteButton {
+.modifyButton {
   background: none;
   border: none;
   cursor: pointer;
-  color: #d9534f;
+  color: #0066ff;
   font-size: 14px;
   transition: color 0.2s;
 }
 
-.deleteButton:hover {
-  color: #b52b27;
+.modifyButton:hover {
+  color: #0053cc;
 }
