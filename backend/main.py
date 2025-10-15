@@ -66,7 +66,7 @@ class AnalysisCreate(BaseModel):
     evidence_id: int
 
 class TransferCreate(BaseModel):
-    case_number: int
+    case_number: str
     t_hash_validation_status: bool
     departure_location: str
     departure_date: date
