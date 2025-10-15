@@ -77,7 +77,7 @@ class AnalysisInformation(Base):
 class TransferInformation(Base):
     __tablename__ = "Transfer_information"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    case_number = Column(Integer)
+    case_number = Column(String(100))
     t_hash_validation_status = Column(Boolean)
     departure_location = Column(String(255))
     departure_date = Column(Date)
@@ -393,7 +393,7 @@ def isSameHash(evidence_id: int, file) -> bool:
 
 # Transfer_Information 에 데이터 삽입
 def createTransferInfo(
-    case_number: int,
+    case_number: str,
     t_hash_validation_status: bool,
     departure_location: str,
     departure_date: str, # "YYYY-MM-DD" 형식 문자열
