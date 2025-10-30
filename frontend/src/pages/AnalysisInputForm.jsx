@@ -260,7 +260,7 @@ const onHashValid = async () => {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     style={{ cursor: isReportUploaded ? 'not-allowed' : 'pointer' }}
-                >Hash
+                >
                     <input
                         type="file"
                         onChange={handleFileChange}

@@ -28,7 +28,7 @@ export default function DataTransfer() {
   const [hashModalIdx, setHashModalIdx] = useState(null);
   const navigate = useNavigate();
   const { caseId } = useParams();
-  const CURRENT_CASEID = Number(caseId);
+  const CURRENT_CASEID = caseId;
 
   // --------------------------
   // ① DB에서 데이터 불러오기
@@ -486,8 +486,6 @@ export default function DataTransfer() {
           disabled={!isAllDone}
           onClick={async () => {
             try {
-              const CURRENT_CASEID = localStorage.getItem("currentCaseID");
-
               if (!CURRENT_CASEID) {
                 alert("현재 사건 ID를 찾을 수 없습니다.");
                 return;
